@@ -105,7 +105,7 @@ contract SemaphoreAirdrop {
             groupId,
             abi.encode(receiver).hashToField(),
             nullifierHash,
-            abi.encode(address(this)).hashToField(),
+            uint256(uint160(address(this))),
             proof
         );
 
