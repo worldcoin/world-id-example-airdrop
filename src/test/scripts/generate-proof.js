@@ -37,8 +37,6 @@ async function main(airdropAddress, receiverAddress) {
         abi.encode(['address'], [receiverAddress])
     )
 
-    console.log(abi.encode(['address'], [airdropAddress]));
-
     const { proof, publicSignals } = await Semaphore.genProof(
         witness,
         './lib/semaphore/build/snark/semaphore.wasm',
