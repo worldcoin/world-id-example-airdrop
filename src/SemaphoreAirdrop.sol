@@ -103,7 +103,7 @@ contract SemaphoreAirdrop {
         semaphore.verifyProof(
             root,
             groupId,
-            abi.encode(receiver).hashToField(),
+            abi.encodePacked(receiver).hashToField(),
             nullifierHash,
             uint256(uint160(address(this))),
             proof
