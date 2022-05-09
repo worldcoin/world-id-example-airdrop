@@ -21,7 +21,7 @@ This repository uses [the Semaphore library](http://semaphore.appliedzkp.org) to
 
 Since only members of a group can claim the airdrop, you'll need to add some entries to your Semaphore group first.
 1. End users will need to generate an identity commitment, which can be done through the [mockWLD app](https://mock-app.id.worldcoin.org) ([docs for mock app](https://id.worldcoin.org/test)).
-2. Add the identity commitment to the group by calling `Semaphore.addMember(YOUR_GROUP_ID, IDENTITY_COMMITMENT)`. _The mockWLD app contains a faucet to add the identity to the [Worldcoin instance](#worldcoin-instance) (if you are using it)_.
+2. Add the identity commitment to the group by calling `Semaphore.addMember(YOUR_GROUP_ID, IDENTITY_COMMITMENT)`. _The mockWLD app contains a faucet to add the identity to the [Worldcoin instance](#-worldcoin-instance) (if you are using it)_.
 3. Once a user has their identity included in the configured group, they can generate a nullifier hash, merkle root and ZKP to claim the airdrop. You can generate that proof by doing a quick deployment of the [World ID JS Integration](https://id.worldcoin.org/docs/js). You need to use the receiver's address as the signal, and use the deployed `SempahoreAirdrop`'s encoded (see `hashBytes` function in the [dapp][dapp] repository) address as the action ID (internally called external nullifier).
 4. With all three parameters, the aidrop can be claimed by calling `SemaphoreAirdrop.claim(RECEIVER_ADDRESS, MERKLE_ROOT, NULLIFIER_HASH, SOLIDITY_ENCODED_PROOF)`
 
