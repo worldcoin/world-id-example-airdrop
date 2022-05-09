@@ -21,9 +21,9 @@ This repository uses [the Semaphore library](http://semaphore.appliedzkp.org) to
 
 Since only members of a group can claim the airdrop, you'll need to add some entries to your Semaphore group first.
 1. End users will need to generate an identity commitment, which can be done through the [mockWLD app](https://mock-app.id.worldcoin.org) ([docs for mock app](https://id.worldcoin.org/test)).
-2. Add the identity commitment to the group by calling `Semaphore.addMember(YOUR_GROUP_ID, IDENTITY_COMMITMENT)`. _The mockWLD app contains a faucet to add the identity to the [Worldcoin instance](#usage-with-worldcoin) (if you are using that)_.
-3. Once users have identities included in the configured group, they can generate a nullifier hash, merkle root and ZKP to claim the airdrop. You can generate that proof by doing a quick deployment of the [World ID JS Integration](https://id.worldcoin.org/docs/js). You need to use the receiver's address as the signal, and use the deployed `SempahoreAirdrop`'s encoded address as the action ID (internally called external nullifier).
-4. Once they have all three, they can claim the aidrop by calling `SemaphoreAirdrop.claim(RECEIVER_ADDRESS, MERKLE_ROOT, NULLIFIER_HASH, SOLIDITY_ENCODED_PROOF)`
+2. Add the identity commitment to the group by calling `Semaphore.addMember(YOUR_GROUP_ID, IDENTITY_COMMITMENT)`. _The mockWLD app contains a faucet to add the identity to the [Worldcoin instance](#worldcoin-instance) (if you are using it)_.
+3. Once a user has their identity included in the configured group, they can generate a nullifier hash, merkle root and ZKP to claim the airdrop. You can generate that proof by doing a quick deployment of the [World ID JS Integration](https://id.worldcoin.org/docs/js). You need to use the receiver's address as the signal, and use the deployed `SempahoreAirdrop`'s encoded (see `hashBytes` function in the [dapp][dapp] repository) address as the action ID (internally called external nullifier).
+4. With all three parameters, the aidrop can be claimed by calling `SemaphoreAirdrop.claim(RECEIVER_ADDRESS, MERKLE_ROOT, NULLIFIER_HASH, SOLIDITY_ENCODED_PROOF)`
 
 You can see the complete flow in action on the [SemaphoreAirdrop tests](./src/test/SemaphoreAirdrop.t.sol).
 
@@ -36,10 +36,16 @@ You can generate your own identity commitments and proofs without relying on the
 
 ## 🌎 Worldcoin instance
 
-Worldcoin will maintain a Semaphore instance with a group for all the people that have onboarded to the protocol.You can point your `SemaphoreAirdrop` instances to it, to rely on the official Worldcoin instance. The production instance contains only identities that have been [verified at an orb](https://worldcoin.org/how-the-launch-works), ensuring only unique humans can claim your airdrop.
+Worldcoin maintains an official Semaphore instance with a group for all the people that have onboarded to the protocol. You can point your `SemaphoreAirdrop` instances directly to it. The production instance contains only identities that have been [verified at an orb](https://worldcoin.org/how-the-launch-works), ensuring only unique humans can claim your airdrop.
 
-- **Staging instance**. For use with the [mockWLD app](https://mock-app.id.worldcoin.org) and the related faucet. Contract address: `0x330C8452C879506f313D1565702560435b0fee4C`.
-- **Production instance**. For use with the actual Worldcoin app and orb verification. Contract address: **Launch coming soon**.
+- **Staging instance**. For use with the [mockWLD app](https://mock-app.id.worldcoin.org) and the related faucet.   
+    ```
+    Contact address: `0x330C8452C879506f313D1565702560435b0fee4C`
+    ```
+- **Production instance**. For use with the actual Worldcoin app and orb verification.
+    ```
+    Contact address: Coming soon.
+    ```
 
 ## 🧑‍💻 Development & testing
 
