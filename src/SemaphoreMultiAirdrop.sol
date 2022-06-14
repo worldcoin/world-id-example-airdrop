@@ -2,9 +2,9 @@
 pragma solidity ^0.8.10;
 
 import { ERC20 } from 'solmate/tokens/ERC20.sol';
-import { ByteHasher } from './libraries/ByteHasher.sol';
-import { ISemaphore } from './interfaces/ISemaphore.sol';
 import { SafeTransferLib } from 'solmate/utils/SafeTransferLib.sol';
+import { IWorldID } from 'world-id-contracts/interfaces/IWorldID.sol';
+import { ByteHasher } from 'world-id-contracts/libraries/ByteHasher.sol';
 
 /// @title Semaphore Multiple Airdrop Manager
 /// @author Miguel Piedrafita
@@ -65,8 +65,8 @@ contract SemaphoreMultiAirdrop {
     ///                              CONFIG STORAGE                            ///
     //////////////////////////////////////////////////////////////////////////////
 
-    /// @dev The Semaphore instance that will be used for managing groups and verifying proofs
-    ISemaphore internal immutable semaphore;
+    /// @dev The WorldID instance that will be used for managing groups and verifying proofs
+    IWorldID internal immutable worldId;
 
     /// @dev Whether a nullifier hash has been used already. Used to prevent double-signaling
     mapping(uint256 => bool) internal nullifierHashes;
@@ -79,11 +79,9 @@ contract SemaphoreMultiAirdrop {
     //////////////////////////////////////////////////////////////////////////////
 
     /// @notice Deploys a SemaphoreAirdrop instance
-    /// @param _semaphore The Semaphore instance that will manage groups and verify proofs
-    constructor(
-        ISemaphore _semaphore
-    ) {
-        semaphore = _semaphore;
+    /// @param _worldId The WorldID instance that will manage groups and verify proofs
+    constructor(IWorldID _worldId) {
+        worldId = _worldId;
     }
 
     /// @notice Create a new airdrop
@@ -133,7 +131,7 @@ contract SemaphoreMultiAirdrop {
         Airdrop memory airdrop = getAirdrop[airdropId];
         if (airdropId == 0 || airdropId >= nextAirdropId) revert InvalidAirdrop();
 
-        semaphore.verifyProof(
+        worldId.verifyProof(
             root,
             airdrop.groupId,
             abi.encodePacked(receiver).hashToField(),

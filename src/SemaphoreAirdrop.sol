@@ -2,9 +2,9 @@
 pragma solidity ^0.8.10;
 
 import { ERC20 } from 'solmate/tokens/ERC20.sol';
-import { ByteHasher } from './libraries/ByteHasher.sol';
-import { ISemaphore } from './interfaces/ISemaphore.sol';
 import { SafeTransferLib } from 'solmate/utils/SafeTransferLib.sol';
+import { IWorldID } from 'world-id-contracts/interfaces/IWorldID.sol';
+import { ByteHasher } from 'world-id-contracts/libraries/ByteHasher.sol';
 
 /// @title Semaphore Single Airdrop Manager
 /// @author Miguel Piedrafita
@@ -38,8 +38,8 @@ contract SemaphoreAirdrop {
     ///                              CONFIG STORAGE                            ///
     //////////////////////////////////////////////////////////////////////////////
 
-    /// @dev The Semaphore instance that will be used for managing groups and verifying proofs
-    ISemaphore internal immutable semaphore;
+    /// @dev The WorldID instance that will be used for managing groups and verifying proofs
+    IWorldID internal immutable worldId;
 
     /// @dev The Semaphore group ID whose participants can claim this airdrop
     uint256 internal immutable groupId;
@@ -65,19 +65,19 @@ contract SemaphoreAirdrop {
     //////////////////////////////////////////////////////////////////////////////
 
     /// @notice Deploys a SemaphoreAirdrop instance
-    /// @param _semaphore The Semaphore instance that will manage groups and verify proofs
+    /// @param _worldId The WorldID instance that will manage groups and verify proofs
     /// @param _groupId The ID of the Semaphore group that will be eligible to claim this airdrop
     /// @param _token The ERC20 token that will be airdropped to eligible participants
     /// @param _holder The address holding the tokens that will be airdropped
     /// @param _airdropAmount The amount of tokens that each participant will receive upon claiming
     constructor(
-        ISemaphore _semaphore,
+        IWorldID _worldId,
         uint256 _groupId,
         ERC20 _token,
         address _holder,
         uint256 _airdropAmount
     ) {
-        semaphore = _semaphore;
+        worldId = _worldId;
         groupId = _groupId;
         token = _token;
         holder = _holder;
@@ -100,7 +100,7 @@ contract SemaphoreAirdrop {
         uint256[8] calldata proof
     ) public {
         if (nullifierHashes[nullifierHash]) revert InvalidNullifier();
-        semaphore.verifyProof(
+        worldId.verifyProof(
             root,
             groupId,
             abi.encodePacked(receiver).hashToField(),
