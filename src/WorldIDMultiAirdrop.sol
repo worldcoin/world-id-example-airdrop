@@ -6,10 +6,10 @@ import { SafeTransferLib } from 'solmate/utils/SafeTransferLib.sol';
 import { IWorldID } from 'world-id-contracts/interfaces/IWorldID.sol';
 import { ByteHasher } from 'world-id-contracts/libraries/ByteHasher.sol';
 
-/// @title Semaphore Multiple Airdrop Manager
+/// @title World ID Multiple Airdrop Manager
 /// @author Miguel Piedrafita
-/// @notice Template contract for managing multiple airdrops using Semaphore groups
-contract SemaphoreMultiAirdrop {
+/// @notice Template contract for managing multiple airdrops to World ID members.
+contract WorldIDMultiAirdrop {
     using ByteHasher for bytes;
 
     ///////////////////////////////////////////////////////////////////////////////
@@ -78,7 +78,7 @@ contract SemaphoreMultiAirdrop {
     ///                               CONSTRUCTOR                              ///
     //////////////////////////////////////////////////////////////////////////////
 
-    /// @notice Deploys a SemaphoreAirdrop instance
+    /// @notice Deploys a WorldIDAirdrop instance
     /// @param _worldId The WorldID instance that will manage groups and verify proofs
     constructor(IWorldID _worldId) {
         worldId = _worldId;
