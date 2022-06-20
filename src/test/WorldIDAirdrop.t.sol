@@ -3,14 +3,14 @@ pragma solidity ^0.8.10;
 
 import { Vm } from 'forge-std/Vm.sol';
 import { DSTest } from 'ds-test/test.sol';
-import { Semaphore } from '../Semaphore.sol';
+import { Semaphore } from 'world-id-contracts/Semaphore.sol';
 import { TestERC20 } from './mock/TestERC20.sol';
 import { TypeConverter } from './utils/TypeConverter.sol';
-import { SemaphoreAirdrop } from '../SemaphoreAirdrop.sol';
+import { WorldIDAirdrop } from '../WorldIDAirdrop.sol';
 
 contract User {}
 
-contract SemaphoreAirdropTest is DSTest {
+contract WorldIDAirdropTest is DSTest {
     using TypeConverter for address;
 
     event AmountUpdated(uint256 amount);
@@ -19,7 +19,7 @@ contract SemaphoreAirdropTest is DSTest {
     uint256 internal groupId;
     TestERC20 internal token;
     Semaphore internal semaphore;
-    SemaphoreAirdrop internal airdrop;
+    WorldIDAirdrop internal airdrop;
     Vm internal hevm = Vm(HEVM_ADDRESS);
 
     function setUp() public {
@@ -27,13 +27,13 @@ contract SemaphoreAirdropTest is DSTest {
         user = new User();
         token = new TestERC20();
         semaphore = new Semaphore();
-        airdrop = new SemaphoreAirdrop(semaphore, groupId, token, address(user), 1 ether);
+        airdrop = new WorldIDAirdrop(semaphore, groupId, token, address(user), 1 ether);
 
         hevm.label(address(this), 'Sender');
         hevm.label(address(user), 'Holder');
         hevm.label(address(token), 'Token');
         hevm.label(address(semaphore), 'Semaphore');
-        hevm.label(address(airdrop), 'SemaphoreAirdrop');
+        hevm.label(address(airdrop), 'WorldIDAirdrop');
 
         // Issue some tokens to the user address, to be airdropped from the contract
         token.issue(address(user), 10 ether);
@@ -120,7 +120,7 @@ contract SemaphoreAirdropTest is DSTest {
         assertEq(token.balanceOf(address(this)), airdrop.airdropAmount());
 
         uint256 root = semaphore.getRoot(groupId);
-        hevm.expectRevert(SemaphoreAirdrop.InvalidNullifier.selector);
+        hevm.expectRevert(WorldIDAirdrop.InvalidNullifier.selector);
         airdrop.claim(address(this), root, nullifierHash, proof);
 
         assertEq(token.balanceOf(address(this)), airdrop.airdropAmount());
@@ -185,7 +185,7 @@ contract SemaphoreAirdropTest is DSTest {
     function testCannotUpdateAirdropAmountIfNotManager() public {
         assertEq(airdrop.airdropAmount(), 1 ether);
 
-        hevm.expectRevert(SemaphoreAirdrop.Unauthorized.selector);
+        hevm.expectRevert(WorldIDAirdrop.Unauthorized.selector);
         hevm.prank(address(user));
         airdrop.updateAmount(2 ether);
 

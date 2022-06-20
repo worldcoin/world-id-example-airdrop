@@ -7,8 +7,8 @@ import { hexlify, concat } from '@ethersproject/bytes'
 import { JsonRpcProvider } from '@ethersproject/providers'
 import { defaultAbiCoder as abi } from '@ethersproject/abi'
 import Semaphore from '../out/Semaphore.sol/Semaphore.json' assert { type: 'json' }
-import SemaphoreAirdrop from '../out/SemaphoreAirdrop.sol/SemaphoreAirdrop.json' assert { type: 'json' }
-import SemaphoreMultiAirdrop from '../out/SemaphoreMultiAirdrop.sol/SemaphoreMultiAirdrop.json' assert { type: 'json' }
+import WorldIDAirdrop from '../out/WorldIDAirdrop.sol/WorldIDAirdrop.json' assert { type: 'json' }
+import WorldIDMultiAirdrop from '../out/WorldIDMultiAirdrop.sol/WorldIDMultiAirdrop.json' assert { type: 'json' }
 import IncrementalBinaryTree from '../out/IncrementalBinaryTree.sol/IncrementalBinaryTree.json' assert { type: 'json' }
 dotenv.config()
 
@@ -85,13 +85,13 @@ async function deployAirdrop(semaphoreAddress) {
         await ask('Amount to airdrop: '),
     ]
 
-    const spinner = ora(`Deploying SemaphoreAirdrop contract...`).start()
+    const spinner = ora(`Deploying WorldIDAirdrop contract...`).start()
 
     let tx = await wallet.sendTransaction({
         data: hexlify(
             concat([
-                SemaphoreAirdrop.bytecode.object,
-                abi.encode(SemaphoreAirdrop.abi[0].inputs, [
+                WorldIDAirdrop.bytecode.object,
+                abi.encode(WorldIDAirdrop.abi[0].inputs, [
                     semaphoreAddress,
                     groupId,
                     erc20Address,
@@ -101,27 +101,27 @@ async function deployAirdrop(semaphoreAddress) {
             ])
         ),
     })
-    spinner.text = `Waiting for SemaphoreAirdrop deploy transaction (tx: ${tx.hash})`
+    spinner.text = `Waiting for WorldIDAirdrop deploy transaction (tx: ${tx.hash})`
     tx = await tx.wait()
-    spinner.succeed(`Deployed SemaphoreAirdrop contract to ${tx.contractAddress}`)
+    spinner.succeed(`Deployed WorldIDAirdrop contract to ${tx.contractAddress}`)
 
     return tx.contractAddress
 }
 
 async function deployMultiAirdrop(semaphoreAddress) {
-    const spinner = ora(`Deploying SemaphoreMultiAirdrop contract...`).start()
+    const spinner = ora(`Deploying WorldIDMultiAirdrop contract...`).start()
 
     let tx = await wallet.sendTransaction({
         data: hexlify(
             concat([
-                SemaphoreMultiAirdrop.bytecode.object,
-                abi.encode(SemaphoreMultiAirdrop.abi[0].inputs, [semaphoreAddress]),
+                WorldIDMultiAirdrop.bytecode.object,
+                abi.encode(WorldIDMultiAirdrop.abi[0].inputs, [semaphoreAddress]),
             ])
         ),
     })
-    spinner.text = `Waiting for SemaphoreMultiAirdrop deploy transaction (tx: ${tx.hash})`
+    spinner.text = `Waiting for WorldIDMultiAirdrop deploy transaction (tx: ${tx.hash})`
     tx = await tx.wait()
-    spinner.succeed(`Deployed SemaphoreMultiAirdrop contract to ${tx.contractAddress}`)
+    spinner.succeed(`Deployed WorldIDMultiAirdrop contract to ${tx.contractAddress}`)
 
     return tx.contractAddress
 }
@@ -131,7 +131,7 @@ async function main(poseidonAddress, ibtAddress, semaphoreAddress) {
     if (!ibtAddress) poseidonAddress = await deployIBT(poseidonAddress)
     if (!semaphoreAddress) semaphoreAddress = await deploySemaphore(ibtAddress)
 
-    const option = await ask('Deploy SemaphoreAirdrop (1) or SemaphoreMultiAirdrop (2)?: ').then(
+    const option = await ask('Deploy WorldIDAirdrop (1) or WorldIDMultiAirdrop (2)?: ').then(
         answer => answer.trim()
     )
 

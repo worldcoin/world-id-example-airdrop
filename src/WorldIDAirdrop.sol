@@ -2,14 +2,14 @@
 pragma solidity ^0.8.10;
 
 import { ERC20 } from 'solmate/tokens/ERC20.sol';
-import { ByteHasher } from './libraries/ByteHasher.sol';
-import { ISemaphore } from './interfaces/ISemaphore.sol';
 import { SafeTransferLib } from 'solmate/utils/SafeTransferLib.sol';
+import { IWorldID } from 'world-id-contracts/interfaces/IWorldID.sol';
+import { ByteHasher } from 'world-id-contracts/libraries/ByteHasher.sol';
 
-/// @title Semaphore Single Airdrop Manager
+/// @title World ID Airdrop example
 /// @author Miguel Piedrafita
-/// @notice Template contract for airdropping tokens to Semaphore group members
-contract SemaphoreAirdrop {
+/// @notice Template contract for airdropping tokens to World ID users
+contract WorldIDAirdrop {
     using ByteHasher for bytes;
 
     ///////////////////////////////////////////////////////////////////////////////
@@ -38,10 +38,10 @@ contract SemaphoreAirdrop {
     ///                              CONFIG STORAGE                            ///
     //////////////////////////////////////////////////////////////////////////////
 
-    /// @dev The Semaphore instance that will be used for managing groups and verifying proofs
-    ISemaphore internal immutable semaphore;
+    /// @dev The WorldID instance that will be used for managing groups and verifying proofs
+    IWorldID internal immutable worldId;
 
-    /// @dev The Semaphore group ID whose participants can claim this airdrop
+    /// @dev The World ID group whose participants can claim this airdrop
     uint256 internal immutable groupId;
 
     /// @notice The ERC20 token airdropped to participants
@@ -64,20 +64,20 @@ contract SemaphoreAirdrop {
     ///                               CONSTRUCTOR                              ///
     //////////////////////////////////////////////////////////////////////////////
 
-    /// @notice Deploys a SemaphoreAirdrop instance
-    /// @param _semaphore The Semaphore instance that will manage groups and verify proofs
-    /// @param _groupId The ID of the Semaphore group that will be eligible to claim this airdrop
+    /// @notice Deploys a WorldIDAirdrop instance
+    /// @param _worldId The WorldID instance that will manage groups and verify proofs
+    /// @param _groupId The ID of the Semaphore group World ID is using (`1`)
     /// @param _token The ERC20 token that will be airdropped to eligible participants
     /// @param _holder The address holding the tokens that will be airdropped
     /// @param _airdropAmount The amount of tokens that each participant will receive upon claiming
     constructor(
-        ISemaphore _semaphore,
+        IWorldID _worldId,
         uint256 _groupId,
         ERC20 _token,
         address _holder,
         uint256 _airdropAmount
     ) {
-        semaphore = _semaphore;
+        worldId = _worldId;
         groupId = _groupId;
         token = _token;
         holder = _holder;
@@ -92,7 +92,7 @@ contract SemaphoreAirdrop {
     /// @param receiver The address that will receive the tokens
     /// @param root The of the Merkle tree
     /// @param nullifierHash The nullifier for this proof, preventing double signaling
-    /// @param proof The zero knowledge proof that demostrates the claimer is part of the Semaphore group
+    /// @param proof The zero knowledge proof that demostrates the claimer has been onboarded to World ID
     function claim(
         address receiver,
         uint256 root,
@@ -100,7 +100,7 @@ contract SemaphoreAirdrop {
         uint256[8] calldata proof
     ) public {
         if (nullifierHashes[nullifierHash]) revert InvalidNullifier();
-        semaphore.verifyProof(
+        worldId.verifyProof(
             root,
             groupId,
             abi.encodePacked(receiver).hashToField(),
