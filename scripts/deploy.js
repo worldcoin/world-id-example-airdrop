@@ -128,7 +128,7 @@ async function deployMultiAirdrop(semaphoreAddress) {
 
 async function main(poseidonAddress, ibtAddress, semaphoreAddress) {
     if (!poseidonAddress) poseidonAddress = await deployPoseidon()
-    if (!ibtAddress) poseidonAddress = await deployIBT(poseidonAddress)
+    if (!ibtAddress) ibtAddress = await deployIBT(poseidonAddress)
     if (!semaphoreAddress) semaphoreAddress = await deploySemaphore(ibtAddress)
 
     const option = await ask('Deploy WorldIDAirdrop (1) or WorldIDMultiAirdrop (2)?: ').then(
