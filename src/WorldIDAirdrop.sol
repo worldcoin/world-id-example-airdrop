@@ -95,11 +95,11 @@ contract WorldIDAirdrop {
 
     /// @notice Claim the airdrop
     /// @param receiver The address that will receive the tokens (this is also the signal of the ZKP)
-    /// @param root The of the Merkle tree
+    /// @param root The root of the Merkle tree
     /// @param nullifierHash The nullifier for this proof, preventing double signaling
     /// @param proof The zero knowledge proof that demonstrates the claimer has a verified World ID
     function claim(
-        address receiver,
+        string memory receiver,
         uint256 root,
         uint256 nullifierHash,
         uint256[8] calldata proof
@@ -108,7 +108,7 @@ contract WorldIDAirdrop {
         worldId.verifyProof(
             root,
             groupId,
-            abi.encodePacked(receiver).hashToField(), // The signal of the proof
+            receiver.hashToField(), // The signal of the proof
             nullifierHash,
             actionId,
             proof
