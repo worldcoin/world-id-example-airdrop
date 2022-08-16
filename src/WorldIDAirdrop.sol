@@ -76,17 +76,17 @@ contract WorldIDAirdrop {
     constructor(
         IWorldID _worldId,
         uint256 _groupId,
+        string memory _actionId,
         ERC20 _token,
         address _holder,
         uint256 _airdropAmount
-        string memory _actionId
     ) {
         worldId = _worldId;
         groupId = _groupId;
+        actionId = abi.encodePacked(_actionId).hashToField();
         token = _token;
         holder = _holder;
         airdropAmount = _airdropAmount;
-        actionId = abi.encodePacked(_actionId).hashToField();
     }
 
     ///////////////////////////////////////////////////////////////////////////////
@@ -99,7 +99,7 @@ contract WorldIDAirdrop {
     /// @param nullifierHash The nullifier for this proof, preventing double signaling
     /// @param proof The zero knowledge proof that demonstrates the claimer has a verified World ID
     function claim(
-        string memory receiver,
+        address receiver,
         uint256 root,
         uint256 nullifierHash,
         uint256[8] calldata proof
@@ -108,7 +108,7 @@ contract WorldIDAirdrop {
         worldId.verifyProof(
             root,
             groupId,
-            receiver.hashToField(), // The signal of the proof
+            abi.encodePacked(receiver).hashToField(), // The signal of the proof
             nullifierHash,
             actionId,
             proof

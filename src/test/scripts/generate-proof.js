@@ -4,6 +4,10 @@ import { defaultAbiCoder as abi } from '@ethersproject/abi'
 import { Semaphore, generateMerkleProof } from '@zk-kit/protocols'
 import verificationKey from '../../../lib/semaphore/build/snark/verification_key.json' assert { type: 'json' }
 
+function hashString(signal) {
+    return BigInt(keccak256(['string'], [signal])) >> BigInt(8)
+}
+
 function hashBytes(signal) {
     return BigInt(keccak256(['bytes'], [signal])) >> BigInt(8)
 }
@@ -20,12 +24,13 @@ function generateSemaphoreWitness(
         identityTrapdoor: identityTrapdoor,
         treePathIndices: merkleProof.pathIndices,
         treeSiblings: merkleProof.siblings,
-        externalNullifier: externalNullifier,
+        externalNullifier: hashString(externalNullifier),
         signalHash: hashBytes(signal),
     }
 }
 
-async function main(airdropAddress, receiverAddress) {
+async function main(receiverAddress) {
+    const actionId = 'wld_test_12345678'
     const identity = new ZkIdentity(Strategy.MESSAGE, 'test-identity')
     const identityCommitment = identity.genIdentityCommitment()
 
@@ -33,7 +38,7 @@ async function main(airdropAddress, receiverAddress) {
         identity.getTrapdoor(),
         identity.getNullifier(),
         generateMerkleProof(20, BigInt(0), [identityCommitment], identityCommitment),
-        hashBytes(airdropAddress),
+        actionId,
         receiverAddress
     )
 

@@ -19,12 +19,10 @@ contract WorldIDMultiAirdropTest is DSTest {
 
     User internal user;
     uint256 internal groupId;
-    uint256 internal immutable actionId;
     TestERC20 internal token;
     Semaphore internal semaphore;
     WorldIDMultiAirdrop internal airdrop;
     Vm internal hevm = Vm(HEVM_ADDRESS);
-    actionId = 'wld_test_12345678';
 
     function setUp() public {
         groupId = 1;
@@ -149,7 +147,7 @@ contract WorldIDMultiAirdropTest is DSTest {
         uint256 root = semaphore.getRoot(groupId);
         semaphore.addMember(groupId, 1);
 
-        hevm.warp(block.timestamp + 2 hours);
+        hevm.warp(block.timestamp + 7 days + 1 hours);
 
         (uint256 nullifierHash, uint256[8] memory proof) = genProof();
         hevm.expectRevert(Semaphore.InvalidRoot.selector);
