@@ -44,6 +44,9 @@ contract WorldIDAirdrop {
     /// @dev The World ID group whose participants can claim this airdrop
     uint256 internal immutable groupId;
 
+    /// @dev The World ID Action ID
+    uint256 internal immutable actionId;
+
     /// @notice The ERC20 token airdropped to participants
     ERC20 public immutable token;
 
@@ -76,12 +79,14 @@ contract WorldIDAirdrop {
         ERC20 _token,
         address _holder,
         uint256 _airdropAmount
+        string memory _actionId
     ) {
         worldId = _worldId;
         groupId = _groupId;
         token = _token;
         holder = _holder;
         airdropAmount = _airdropAmount;
+        actionId = abi.encodePacked(_actionId).hashToField();
     }
 
     ///////////////////////////////////////////////////////////////////////////////
@@ -89,10 +94,10 @@ contract WorldIDAirdrop {
     //////////////////////////////////////////////////////////////////////////////
 
     /// @notice Claim the airdrop
-    /// @param receiver The address that will receive the tokens
+    /// @param receiver The address that will receive the tokens (this is also the signal of the ZKP)
     /// @param root The of the Merkle tree
     /// @param nullifierHash The nullifier for this proof, preventing double signaling
-    /// @param proof The zero knowledge proof that demostrates the claimer has been onboarded to World ID
+    /// @param proof The zero knowledge proof that demonstrates the claimer has a verified World ID
     function claim(
         address receiver,
         uint256 root,
@@ -103,9 +108,9 @@ contract WorldIDAirdrop {
         worldId.verifyProof(
             root,
             groupId,
-            abi.encodePacked(receiver).hashToField(),
+            abi.encodePacked(receiver).hashToField(), // The signal of the proof
             nullifierHash,
-            abi.encodePacked(address(this)).hashToField(),
+            actionId,
             proof
         );
 

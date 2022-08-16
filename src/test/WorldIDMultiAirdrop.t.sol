@@ -19,10 +19,12 @@ contract WorldIDMultiAirdropTest is DSTest {
 
     User internal user;
     uint256 internal groupId;
+    uint256 internal immutable actionId;
     TestERC20 internal token;
     Semaphore internal semaphore;
     WorldIDMultiAirdrop internal airdrop;
     Vm internal hevm = Vm(HEVM_ADDRESS);
+    actionId = 'wld_test_12345678';
 
     function setUp() public {
         groupId = 1;

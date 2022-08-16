@@ -19,6 +19,7 @@ contract WorldIDAirdropTest is DSTest {
     uint256 internal groupId;
     TestERC20 internal token;
     Semaphore internal semaphore;
+    uint256 internal immutable actionId;
     WorldIDAirdrop internal airdrop;
     Vm internal hevm = Vm(HEVM_ADDRESS);
 
@@ -28,6 +29,7 @@ contract WorldIDAirdropTest is DSTest {
         token = new TestERC20();
         semaphore = new Semaphore();
         airdrop = new WorldIDAirdrop(semaphore, groupId, token, address(user), 1 ether);
+        actionId = 'wld_test_12345678';
 
         hevm.label(address(this), 'Sender');
         hevm.label(address(user), 'Holder');
