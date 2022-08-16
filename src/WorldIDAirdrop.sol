@@ -70,6 +70,7 @@ contract WorldIDAirdrop {
     /// @notice Deploys a WorldIDAirdrop instance
     /// @param _worldId The WorldID instance that will manage groups and verify proofs
     /// @param _groupId The ID of the Semaphore group World ID is using (`1`)
+    /// @param _actionId The actionId as registered in the developer portal
     /// @param _token The ERC20 token that will be airdropped to eligible participants
     /// @param _holder The address holding the tokens that will be airdropped
     /// @param _airdropAmount The amount of tokens that each participant will receive upon claiming

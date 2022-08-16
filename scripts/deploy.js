@@ -78,8 +78,9 @@ async function deploySemaphore(ibtAddress) {
 }
 
 async function deployAirdrop(semaphoreAddress) {
-    const [groupId, erc20Address, holderAddress, airdropAmount] = [
+    const [groupId, actionId, erc20Address, holderAddress, airdropAmount] = [
         await ask('Semaphore group id: '),
+        await ask('ActionId: '),
         await ask('ERC20 address: '),
         await ask('ERC20 holder address: '),
         await ask('Amount to airdrop: '),
@@ -94,6 +95,7 @@ async function deployAirdrop(semaphoreAddress) {
                 abi.encode(WorldIDAirdrop.abi[0].inputs, [
                     semaphoreAddress,
                     groupId,
+                    actionId,
                     erc20Address,
                     holderAddress,
                     airdropAmount,
