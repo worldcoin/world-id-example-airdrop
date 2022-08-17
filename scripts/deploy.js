@@ -5,11 +5,13 @@ import { Wallet } from '@ethersproject/wallet'
 import { poseidon_gencontract } from 'circomlibjs'
 import { hexlify, concat } from '@ethersproject/bytes'
 import { JsonRpcProvider } from '@ethersproject/providers'
+import { Contract } from '@ethersproject/contracts'
 import { defaultAbiCoder as abi } from '@ethersproject/abi'
 import Semaphore from '../out/Semaphore.sol/Semaphore.json' assert { type: 'json' }
 import WorldIDAirdrop from '../out/WorldIDAirdrop.sol/WorldIDAirdrop.json' assert { type: 'json' }
 import WorldIDMultiAirdrop from '../out/WorldIDMultiAirdrop.sol/WorldIDMultiAirdrop.json' assert { type: 'json' }
 import IncrementalBinaryTree from '../out/IncrementalBinaryTree.sol/IncrementalBinaryTree.json' assert { type: 'json' }
+import ERC20 from '../out/ERC20.sol/ERC20.json' assert { type: 'json' }
 dotenv.config()
 
 let validConfig = true
@@ -128,12 +130,28 @@ async function deployMultiAirdrop(semaphoreAddress) {
     return tx.contractAddress
 }
 
+async function setAllowance() {
+    const [tokenAddress, holder, amount] = [
+        await ask('ERC20 address: '),
+        await ask('Spender address: '),
+        await ask('Amount: '),
+    ]
+
+    const spinner = ora(`setting allowance...`).start()
+
+    const contract = new Contract(tokenAddress, ERC20.abi, wallet)
+    const tx = await contract.approve(holder, amount, { maxPriorityFeePerGas: 31e9, maxFeePerGas: 60e9});
+
+    spinner.text = `Waiting for approve transaction (tx: ${tx.hash})`
+    spinner.succeed(`Allowance set for ${holder}!`)
+}
+
 async function main(poseidonAddress, ibtAddress, semaphoreAddress) {
     if (!poseidonAddress) poseidonAddress = await deployPoseidon()
     if (!ibtAddress) ibtAddress = await deployIBT(poseidonAddress)
     if (!semaphoreAddress) semaphoreAddress = await deploySemaphore(ibtAddress)
 
-    const option = await ask('Deploy WorldIDAirdrop (1) or WorldIDMultiAirdrop (2)?: ').then(
+    const option = await ask('Deploy WorldIDAirdrop (1), WorldIDMultiAirdrop (2) or set allowance (3): ').then(
         answer => answer.trim()
     )
 
@@ -144,9 +162,12 @@ async function main(poseidonAddress, ibtAddress, semaphoreAddress) {
         case '2':
             await deployMultiAirdrop(semaphoreAddress)
             break
+        case '3':
+            await setAllowance()
+            break
 
         default:
-            console.log('Please enter either 1 or 2. Exiting...')
+            console.log('Please enter either 1, 2 or 3. Exiting...')
             process.exit(1)
             break
     }
