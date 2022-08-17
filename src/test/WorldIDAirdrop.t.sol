@@ -27,7 +27,7 @@ contract WorldIDAirdropTest is DSTest {
         user = new User();
         token = new TestERC20();
         semaphore = new Semaphore();
-        airdrop = new WorldIDAirdrop(semaphore, groupId, token, address(user), 1 ether);
+        airdrop = new WorldIDAirdrop(semaphore, groupId, 'wld_test_12345678', token, address(user), 1 ether);
 
         hevm.label(address(this), 'Sender');
         hevm.label(address(user), 'Holder');
@@ -53,12 +53,11 @@ contract WorldIDAirdropTest is DSTest {
     }
 
     function genProof() internal returns (uint256, uint256[8] memory proof) {
-        string[] memory ffiArgs = new string[](5);
+        string[] memory ffiArgs = new string[](4);
         ffiArgs[0] = 'node';
         ffiArgs[1] = '--no-warnings';
         ffiArgs[2] = 'src/test/scripts/generate-proof.js';
-        ffiArgs[3] = address(airdrop).toString();
-        ffiArgs[4] = address(this).toString();
+        ffiArgs[3] = address(this).toString();
 
         bytes memory returnData = hevm.ffi(ffiArgs);
 
@@ -99,7 +98,7 @@ contract WorldIDAirdropTest is DSTest {
         uint256 root = semaphore.getRoot(groupId);
         semaphore.addMember(groupId, 1);
 
-        hevm.warp(block.timestamp + 2 hours);
+        hevm.warp(block.timestamp + 7 days + 1 hours);
 
         (uint256 nullifierHash, uint256[8] memory proof) = genProof();
         hevm.expectRevert(Semaphore.InvalidRoot.selector);

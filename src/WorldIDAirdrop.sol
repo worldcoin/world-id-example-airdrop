@@ -44,6 +44,9 @@ contract WorldIDAirdrop {
     /// @dev The World ID group whose participants can claim this airdrop
     uint256 internal immutable groupId;
 
+    /// @dev The World ID Action ID
+    uint256 internal immutable actionId;
+
     /// @notice The ERC20 token airdropped to participants
     ERC20 public immutable token;
 
@@ -67,18 +70,21 @@ contract WorldIDAirdrop {
     /// @notice Deploys a WorldIDAirdrop instance
     /// @param _worldId The WorldID instance that will manage groups and verify proofs
     /// @param _groupId The ID of the Semaphore group World ID is using (`1`)
+    /// @param _actionId The actionId as registered in the developer portal
     /// @param _token The ERC20 token that will be airdropped to eligible participants
     /// @param _holder The address holding the tokens that will be airdropped
     /// @param _airdropAmount The amount of tokens that each participant will receive upon claiming
     constructor(
         IWorldID _worldId,
         uint256 _groupId,
+        string memory _actionId,
         ERC20 _token,
         address _holder,
         uint256 _airdropAmount
     ) {
         worldId = _worldId;
         groupId = _groupId;
+        actionId = abi.encodePacked(_actionId).hashToField();
         token = _token;
         holder = _holder;
         airdropAmount = _airdropAmount;
@@ -89,10 +95,10 @@ contract WorldIDAirdrop {
     //////////////////////////////////////////////////////////////////////////////
 
     /// @notice Claim the airdrop
-    /// @param receiver The address that will receive the tokens
-    /// @param root The of the Merkle tree
+    /// @param receiver The address that will receive the tokens (this is also the signal of the ZKP)
+    /// @param root The root of the Merkle tree
     /// @param nullifierHash The nullifier for this proof, preventing double signaling
-    /// @param proof The zero knowledge proof that demostrates the claimer has been onboarded to World ID
+    /// @param proof The zero knowledge proof that demonstrates the claimer has a verified World ID
     function claim(
         address receiver,
         uint256 root,
@@ -103,9 +109,9 @@ contract WorldIDAirdrop {
         worldId.verifyProof(
             root,
             groupId,
-            abi.encodePacked(receiver).hashToField(),
+            abi.encodePacked(receiver).hashToField(), // The signal of the proof
             nullifierHash,
-            abi.encodePacked(address(this)).hashToField(),
+            actionId,
             proof
         );
 

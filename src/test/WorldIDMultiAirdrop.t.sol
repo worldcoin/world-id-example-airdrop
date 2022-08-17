@@ -147,7 +147,7 @@ contract WorldIDMultiAirdropTest is DSTest {
         uint256 root = semaphore.getRoot(groupId);
         semaphore.addMember(groupId, 1);
 
-        hevm.warp(block.timestamp + 2 hours);
+        hevm.warp(block.timestamp + 7 days + 1 hours);
 
         (uint256 nullifierHash, uint256[8] memory proof) = genProof();
         hevm.expectRevert(Semaphore.InvalidRoot.selector);
