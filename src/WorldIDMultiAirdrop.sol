@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.10;
+pragma solidity ^0.8.19;
 
-import { ERC20 } from 'solmate/tokens/ERC20.sol';
-import { SafeTransferLib } from 'solmate/utils/SafeTransferLib.sol';
-import { IWorldID } from 'world-id-contracts/interfaces/IWorldID.sol';
-import { ByteHasher } from 'world-id-contracts/libraries/ByteHasher.sol';
+import {ERC20} from "solmate/tokens/ERC20.sol";
+import {SafeTransferLib} from "solmate/utils/SafeTransferLib.sol";
+import {IWorldID} from "world-id-contracts/interfaces/IWorldID.sol";
+import {ByteHasher} from "world-id-contracts/libraries/ByteHasher.sol";
 
 /// @title World ID Multiple Airdrop Manager
 /// @author Miguel Piedrafita
@@ -89,12 +89,7 @@ contract WorldIDMultiAirdrop {
     /// @param token The ERC20 token that will be airdropped to eligible participants
     /// @param holder The address holding the tokens that will be airdropped
     /// @param amount The amount of tokens that each participant will receive upon claiming
-    function createAirdrop(
-        uint256 groupId,
-        ERC20 token,
-        address holder,
-        uint256 amount
-    ) public {
+    function createAirdrop(uint256 groupId, ERC20 token, address holder, uint256 amount) public {
         Airdrop memory airdrop = Airdrop({
             groupId: groupId,
             token: token,

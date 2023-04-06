@@ -1,13 +1,15 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.10;
+pragma solidity ^0.8.19;
 
-import { ERC20 } from 'solmate/tokens/ERC20.sol';
-import { SafeTransferLib } from 'solmate/utils/SafeTransferLib.sol';
-import { IWorldID } from 'world-id-contracts/interfaces/IWorldID.sol';
-import { ByteHasher } from 'world-id-contracts/libraries/ByteHasher.sol';
+import {ERC20} from "solmate/tokens/ERC20.sol";
+import {SafeTransferLib} from "solmate/utils/SafeTransferLib.sol";
+import {IWorldID} from "world-id-contracts/interfaces/IWorldID.sol";
+import {IWorldIDGroups} from "world-id-contracts/interfaces/IWorldIDGroups.sol";
+import {ByteHasher} from "world-id-contracts/libraries/ByteHasher.sol";
 
 /// @title World ID Airdrop example
 /// @author Miguel Piedrafita
+/// @author dcbuild3r
 /// @notice Template contract for airdropping tokens to World ID users
 contract WorldIDAirdrop {
     using ByteHasher for bytes;
@@ -39,7 +41,7 @@ contract WorldIDAirdrop {
     //////////////////////////////////////////////////////////////////////////////
 
     /// @dev The WorldID instance that will be used for managing groups and verifying proofs
-    IWorldID internal immutable worldId;
+    IWorldIDGroups internal immutable worldIdRouter;
 
     /// @dev The World ID group whose participants can claim this airdrop
     uint256 internal immutable groupId;
@@ -99,19 +101,16 @@ contract WorldIDAirdrop {
     /// @param root The root of the Merkle tree
     /// @param nullifierHash The nullifier for this proof, preventing double signaling
     /// @param proof The zero knowledge proof that demonstrates the claimer has a verified World ID
-    function claim(
-        address receiver,
-        uint256 root,
-        uint256 nullifierHash,
-        uint256[8] calldata proof
-    ) public {
+    function claim(address receiver, uint256 root, uint256 nullifierHash, uint256[8] calldata proof)
+        public
+    {
         if (nullifierHashes[nullifierHash]) revert InvalidNullifier();
-        worldId.verifyProof(
-            root,
+        worldIdRouter.verifyProof(
             groupId,
+            root,
             abi.encodePacked(receiver).hashToField(), // The signal of the proof
             nullifierHash,
-            actionId,
+            abi.encodePacked(actionId).hashToField(), // The external nullifier hash
             proof
         );
 

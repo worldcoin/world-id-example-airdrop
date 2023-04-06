@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.10;
+pragma solidity ^0.8.19;
 
-import { Vm } from 'forge-std/Vm.sol';
-import { DSTest } from 'ds-test/test.sol';
-import { Semaphore } from 'world-id-contracts/Semaphore.sol';
-import { TestERC20 } from './mock/TestERC20.sol';
-import { TypeConverter } from './utils/TypeConverter.sol';
-import { WorldIDAirdrop } from '../WorldIDAirdrop.sol';
+import {Vm} from "forge-std/Vm.sol";
+import {DSTest} from "ds-test/test.sol";
+import {Semaphore} from "world-id-contracts/Semaphore.sol";
+import {TestERC20} from "./mock/TestERC20.sol";
+import {TypeConverter} from "./utils/TypeConverter.sol";
+import {WorldIDAirdrop} from "../WorldIDAirdrop.sol";
 
 contract User {}
 
@@ -27,13 +27,14 @@ contract WorldIDAirdropTest is DSTest {
         user = new User();
         token = new TestERC20();
         semaphore = new Semaphore();
-        airdrop = new WorldIDAirdrop(semaphore, groupId, 'wld_test_12345678', token, address(user), 1 ether);
+        airdrop =
+        new WorldIDAirdrop(semaphore, groupId, 'wld_test_12345678', token, address(user), 1 ether);
 
-        hevm.label(address(this), 'Sender');
-        hevm.label(address(user), 'Holder');
-        hevm.label(address(token), 'Token');
-        hevm.label(address(semaphore), 'Semaphore');
-        hevm.label(address(airdrop), 'WorldIDAirdrop');
+        hevm.label(address(this), "Sender");
+        hevm.label(address(user), "Holder");
+        hevm.label(address(token), "Token");
+        hevm.label(address(semaphore), "Semaphore");
+        hevm.label(address(airdrop), "WorldIDAirdrop");
 
         // Issue some tokens to the user address, to be airdropped from the contract
         token.issue(address(user), 10 ether);
@@ -43,32 +44,9 @@ contract WorldIDAirdropTest is DSTest {
         token.approve(address(airdrop), type(uint256).max);
     }
 
-    function genIdentityCommitment() internal returns (uint256) {
-        string[] memory ffiArgs = new string[](2);
-        ffiArgs[0] = 'node';
-        ffiArgs[1] = 'src/test/scripts/generate-commitment.js';
-
-        bytes memory returnData = hevm.ffi(ffiArgs);
-        return abi.decode(returnData, (uint256));
-    }
-
-    function genProof() internal returns (uint256, uint256[8] memory proof) {
-        string[] memory ffiArgs = new string[](4);
-        ffiArgs[0] = 'node';
-        ffiArgs[1] = '--no-warnings';
-        ffiArgs[2] = 'src/test/scripts/generate-proof.js';
-        ffiArgs[3] = address(this).toString();
-
-        bytes memory returnData = hevm.ffi(ffiArgs);
-
-        return abi.decode(returnData, (uint256, uint256[8]));
-    }
-
     function testCanClaim() public {
         assertEq(token.balanceOf(address(this)), 0);
 
-        semaphore.createGroup(groupId, 20, 0);
-        semaphore.addMember(groupId, genIdentityCommitment());
 
         (uint256 nullifierHash, uint256[8] memory proof) = genProof();
         airdrop.claim(address(this), semaphore.getRoot(groupId), nullifierHash, proof);
@@ -134,7 +112,7 @@ contract WorldIDAirdropTest is DSTest {
         uint256 root = semaphore.getRoot(groupId);
         (uint256 nullifierHash, uint256[8] memory proof) = genProof();
 
-        hevm.expectRevert(abi.encodeWithSignature('InvalidProof()'));
+        hevm.expectRevert(abi.encodeWithSignature("InvalidProof()"));
         airdrop.claim(address(this), root, nullifierHash, proof);
 
         assertEq(token.balanceOf(address(this)), 0);
@@ -149,7 +127,7 @@ contract WorldIDAirdropTest is DSTest {
         (uint256 nullifierHash, uint256[8] memory proof) = genProof();
 
         uint256 root = semaphore.getRoot(groupId);
-        hevm.expectRevert(abi.encodeWithSignature('InvalidProof()'));
+        hevm.expectRevert(abi.encodeWithSignature("InvalidProof()"));
         airdrop.claim(address(user), root, nullifierHash, proof);
 
         assertEq(token.balanceOf(address(this)), 0);
@@ -165,7 +143,7 @@ contract WorldIDAirdropTest is DSTest {
         proof[0] ^= 42;
 
         uint256 root = semaphore.getRoot(groupId);
-        hevm.expectRevert(abi.encodeWithSignature('InvalidProof()'));
+        hevm.expectRevert(abi.encodeWithSignature("InvalidProof()"));
         airdrop.claim(address(this), root, nullifierHash, proof);
 
         assertEq(token.balanceOf(address(this)), 0);

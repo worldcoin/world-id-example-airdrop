@@ -1,8 +1,18 @@
-[default]
+[profile.default]
 src = 'src'
 out = 'out'
 libs = ['lib']
 ffi = true
 remappings = ['ds-test/=lib/ds-test/src/', '@zk-kit/=lib/zk-kit/packages/', '@openzeppelin/=lib/openzeppelin-contracts/']
+
+# Make formatting consistent.
+[profile.default.fmt]
+line_length = 100               # The maximum length of lines.
+tab_width = 4                   # Indent by two spaces for each level.
+bracket_spacing = false         # Don't put spaces between brackets and content.
+int_types = "long"              # Specify full integer type names.
+
+# We want to optimise via the new optimiser backend for better results.
+via_ir = true
 
 # See more config options https://github.com/gakonst/foundry/tree/master/config
