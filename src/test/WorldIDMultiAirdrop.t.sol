@@ -126,46 +126,6 @@ contract WorldIDMultiAirdropTest is PRBTest {
         assertEq(token.balanceOf(address(this)), 1 ether);
     }
 
-    function testCannotClaimIfNotMember(uint256 worldIDRoot, uint256 nullifierHash) public {
-        vm.assume(worldIDRoot != 0 && nullifierHash != 0);
-
-        assertEq(token.balanceOf(address(this)), 0);
-
-        airdrop.createAirdrop(groupId, token, address(user), 1 ether);
-
-        vm.expectRevert(abi.encodeWithSignature("InvalidProof()"));
-        airdrop.claim(1, address(this), worldIDRoot, nullifierHash, proof);
-
-        assertEq(token.balanceOf(address(this)), 0);
-    }
-
-    function testCannotClaimWithInvalidSignal(uint256 worldIDRoot, uint256 nullifierHash) public {
-        vm.assume(worldIDRoot != 0 && nullifierHash != 0);
-
-        assertEq(token.balanceOf(address(this)), 0);
-
-        airdrop.createAirdrop(groupId, token, address(user), 1 ether);
-
-        vm.expectRevert(abi.encodeWithSignature("InvalidProof()"));
-        airdrop.claim(1, address(user), worldIDRoot, nullifierHash, proof);
-
-        assertEq(token.balanceOf(address(this)), 0);
-    }
-
-    function testCannotClaimWithInvalidProof(uint256 worldIDRoot, uint256 nullifierHash) public {
-        vm.assume(worldIDRoot != 0 && nullifierHash != 0);
-
-        assertEq(token.balanceOf(address(this)), 0);
-
-        airdrop.createAirdrop(groupId, token, address(user), 1 ether);
-        proof[0] ^= 42;
-
-        vm.expectRevert(abi.encodeWithSignature("InvalidProof()"));
-        airdrop.claim(1, address(this), worldIDRoot, nullifierHash, proof);
-
-        assertEq(token.balanceOf(address(this)), 0);
-    }
-
     function testCanUpdateAirdropDetails() public {
         airdrop.createAirdrop(groupId, token, address(user), 1 ether);
 

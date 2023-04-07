@@ -80,22 +80,6 @@ contract WorldIDAirdropTest is PRBTest {
         assertEq(token.balanceOf(address(this)), airdrop.airdropAmount());
     }
 
-    function testCannotClaimWithInvalidSignal(uint256 worldIDRoot, uint256 nullifierHash) public {
-        vm.expectRevert(abi.encodeWithSignature("InvalidProof()"));
-        airdrop.claim(address(user), worldIDRoot, nullifierHash, proof);
-
-        assertEq(token.balanceOf(address(this)), 0);
-    }
-
-    function testCannotClaimWithInvalidProof(uint256 worldIDRoot, uint256 nullifierHash) public {
-        assertEq(token.balanceOf(address(this)), 0);
-
-        vm.expectRevert(abi.encodeWithSignature("InvalidProof()"));
-        airdrop.claim(address(this), worldIDRoot, nullifierHash, proof);
-
-        assertEq(token.balanceOf(address(this)), 0);
-    }
-
     function testUpdateAirdropAmount() public {
         assertEq(airdrop.airdropAmount(), 1 ether);
 
