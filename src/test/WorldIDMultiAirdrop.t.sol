@@ -19,6 +19,7 @@ contract WorldIDMultiAirdropTest is PRBTest {
     User internal user;
     uint256 internal groupId;
     TestERC20 internal token;
+    uint256[8] internal proof;
     WorldIDIdentityManagerRouterMock internal worldIDIdentityManagerRouterMock;
     WorldIDMultiAirdrop internal airdrop;
 
@@ -28,6 +29,7 @@ contract WorldIDMultiAirdropTest is PRBTest {
         token = new TestERC20();
         worldIDIdentityManagerRouterMock = new WorldIDIdentityManagerRouterMock();
         airdrop = new WorldIDMultiAirdrop(worldIDIdentityManagerRouterMock);
+        proof = [0, 0, 0, 0, 0, 0, 0, 0];
 
         vm.label(address(this), "Sender");
         vm.label(address(user), "Holder");
@@ -68,7 +70,7 @@ contract WorldIDMultiAirdropTest is PRBTest {
     }
 
     /// @dev mocks verifyProof inside airdrop.claim(), always goes through
-    function testCanClaim(uint256 worldIDRoot, uint256 nullifierHash, uint256[8] proof) public {
+    function testCanClaim(uint256 worldIDRoot, uint256 nullifierHash) public {
         vm.assume(worldIDRoot != 0 && nullifierHash != 0);
 
         assertEq(token.balanceOf(address(this)), 0);
@@ -83,11 +85,7 @@ contract WorldIDMultiAirdropTest is PRBTest {
     }
 
     /// @dev mocks verifyProof inside airdrop.claim(), always goes through
-    function testCannotClaimNonExistantAirdrop(
-        uint256 worldIDRoot,
-        uint256 nullifierHash,
-        uint256[8] proof
-    ) public {
+    function testCannotClaimNonExistantAirdrop(uint256 worldIDRoot, uint256 nullifierHash) public {
         vm.assume(worldIDRoot != 0 && nullifierHash != 0);
 
         assertEq(token.balanceOf(address(this)), 0);
@@ -99,13 +97,9 @@ contract WorldIDMultiAirdropTest is PRBTest {
     }
 
     /// @dev mocks verifyProof inside airdrop.claim(), always goes through
-    function testCanClaimAfterNewMemberAdded(
-        uint256 worldIDRoot,
-        uint256 nullifierHash,
-        uint256[8] proof
-    ) public {
+    function testCanClaimAfterNewMemberAdded(uint256 worldIDRoot, uint256 nullifierHash) public {
         vm.assume(worldIDRoot != 0 && nullifierHash != 0);
-        
+
         assertEq(token.balanceOf(address(this)), 0);
 
         airdrop.createAirdrop(groupId, token, address(user), 1 ether);
@@ -115,9 +109,7 @@ contract WorldIDMultiAirdropTest is PRBTest {
         assertEq(token.balanceOf(address(this)), 1 ether);
     }
 
-    function testCannotDoubleClaim(int256 worldIDRoot, uint256 nullifierHash, uint256[8] proof)
-        public
-    {
+    function testCannotDoubleClaim(uint256 worldIDRoot, uint256 nullifierHash) public {
         vm.assume(worldIDRoot != 0 && nullifierHash != 0);
 
         assertEq(token.balanceOf(address(this)), 0);
@@ -134,7 +126,7 @@ contract WorldIDMultiAirdropTest is PRBTest {
         assertEq(token.balanceOf(address(this)), 1 ether);
     }
 
-    function testCannotClaimIfNotMember(int256 worldIDRoot, uint256 nullifierHash, uint256[8] proof) public {
+    function testCannotClaimIfNotMember(uint256 worldIDRoot, uint256 nullifierHash) public {
         vm.assume(worldIDRoot != 0 && nullifierHash != 0);
 
         assertEq(token.balanceOf(address(this)), 0);
@@ -147,35 +139,29 @@ contract WorldIDMultiAirdropTest is PRBTest {
         assertEq(token.balanceOf(address(this)), 0);
     }
 
-    function testCannotClaimWithInvalidSignal() public {
+    function testCannotClaimWithInvalidSignal(uint256 worldIDRoot, uint256 nullifierHash) public {
+        vm.assume(worldIDRoot != 0 && nullifierHash != 0);
+
         assertEq(token.balanceOf(address(this)), 0);
 
         airdrop.createAirdrop(groupId, token, address(user), 1 ether);
-        semaphore.createGroup(groupId, 20, 0);
-        semaphore.addMember(groupId, genIdentityCommitment());
 
-        (uint256 nullifierHash, uint256[8] memory proof) = genProof();
-
-        uint256 root = semaphore.getRoot(groupId);
         vm.expectRevert(abi.encodeWithSignature("InvalidProof()"));
-        airdrop.claim(1, address(user), root, nullifierHash, proof);
+        airdrop.claim(1, address(user), worldIDRoot, nullifierHash, proof);
 
         assertEq(token.balanceOf(address(this)), 0);
     }
 
-    function testCannotClaimWithInvalidProof() public {
+    function testCannotClaimWithInvalidProof(uint256 worldIDRoot, uint256 nullifierHash) public {
+        vm.assume(worldIDRoot != 0 && nullifierHash != 0);
+
         assertEq(token.balanceOf(address(this)), 0);
 
         airdrop.createAirdrop(groupId, token, address(user), 1 ether);
-        semaphore.createGroup(groupId, 20, 0);
-        semaphore.addMember(groupId, genIdentityCommitment());
-
-        (uint256 nullifierHash, uint256[8] memory proof) = genProof();
         proof[0] ^= 42;
 
-        uint256 root = semaphore.getRoot(groupId);
         vm.expectRevert(abi.encodeWithSignature("InvalidProof()"));
-        airdrop.claim(1, address(this), root, nullifierHash, proof);
+        airdrop.claim(1, address(this), worldIDRoot, nullifierHash, proof);
 
         assertEq(token.balanceOf(address(this)), 0);
     }
