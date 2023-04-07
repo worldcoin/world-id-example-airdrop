@@ -70,21 +70,21 @@ contract WorldIDAirdrop {
     //////////////////////////////////////////////////////////////////////////////
 
     /// @notice Deploys a WorldIDAirdrop instance
-    /// @param _worldId The WorldID instance that will manage groups and verify proofs
+    /// @param _worldId The WorldID router instance that will manage groups and verify proofs
     /// @param _groupId The ID of the Semaphore group World ID is using (`1`)
     /// @param _actionId The actionId as registered in the developer portal
     /// @param _token The ERC20 token that will be airdropped to eligible participants
     /// @param _holder The address holding the tokens that will be airdropped
     /// @param _airdropAmount The amount of tokens that each participant will receive upon claiming
     constructor(
-        IWorldID _worldId,
+        IWorldIDGroups _worldId,
         uint256 _groupId,
         string memory _actionId,
         ERC20 _token,
         address _holder,
         uint256 _airdropAmount
     ) {
-        worldId = _worldId;
+        worldIdRouter = _worldId;
         groupId = _groupId;
         actionId = abi.encodePacked(_actionId).hashToField();
         token = _token;

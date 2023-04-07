@@ -22,7 +22,7 @@ contract WorldIDMultiAirdrop {
     /// @notice Thrown when attempting to reuse a nullifier
     error InvalidNullifier();
 
-    /// @notice Thrown when attempting to claim a non-existant airdrop
+    /// @notice Thrown when attempting to claim a non-existent airdrop
     error InvalidAirdrop();
 
     ///////////////////////////////////////////////////////////////////////////////

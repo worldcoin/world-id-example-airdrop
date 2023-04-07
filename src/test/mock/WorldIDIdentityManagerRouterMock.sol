@@ -6,7 +6,7 @@ import {IWorldIDGroups} from "world-id-contracts/interfaces/IWorldIDGroups.sol";
 /// @title World ID Identity Manager Router Mock
 /// @author dcbuild3r
 /// @notice Mocks the verifyProof functionality of the Semaphore v3 verifier
-contract WorldIDIdentityManagerMock is IWorldIDGroups {
+contract WorldIDIdentityManagerRouterMock is IWorldIDGroups {
     /// @notice Thrown to mock the verification of a WorldID zero knowledge proof.
     event proofVerified();
 
@@ -24,7 +24,7 @@ contract WorldIDIdentityManagerMock is IWorldIDGroups {
     ///
     /// @custom:reverts string If the `proof` is invalid.
     /// @custom:reverts NoSuchGroup If the provided `groupId` references a group that does not exist.
-    function verifyProof (
+    function verifyProof(
         uint256 groupId,
         uint256 root,
         uint256 signalHash,
