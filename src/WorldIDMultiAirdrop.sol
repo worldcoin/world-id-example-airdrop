@@ -3,7 +3,7 @@ pragma solidity ^0.8.19;
 
 import {ERC20} from "solmate/tokens/ERC20.sol";
 import {SafeTransferLib} from "solmate/utils/SafeTransferLib.sol";
-import {IWorldID} from "world-id-contracts/interfaces/IWorldID.sol";
+import {IWorldIDGroups} from "world-id-contracts/interfaces/IWorldIDGroups.sol";
 import {ByteHasher} from "world-id-contracts/libraries/ByteHasher.sol";
 
 /// @title World ID Multiple Airdrop Manager
@@ -48,7 +48,7 @@ contract WorldIDMultiAirdrop {
     //////////////////////////////////////////////////////////////////////////////
 
     /// @notice Stores the details for a specific airdrop
-    /// @param groupId The ID of the Semaphore group that will be eligible to claim this airdrop
+    /// @param groupId The ID of the WorldIDRouter group that will be eligible to claim this airdrop
     /// @param token The ERC20 token that will be airdropped to eligible participants
     /// @param manager The address that manages this airdrop, which is allowed to update the airdrop details.
     /// @param holder The address holding the tokens that will be airdropped
@@ -65,8 +65,8 @@ contract WorldIDMultiAirdrop {
     ///                              CONFIG STORAGE                            ///
     //////////////////////////////////////////////////////////////////////////////
 
-    /// @dev The WorldID instance that will be used for managing groups and verifying proofs
-    IWorldID internal immutable worldId;
+    /// @dev The WorldID router instance that will be used for managing groups and verifying proofs
+    IWorldIDGroups internal immutable worldIdRouter;
 
     /// @dev Whether a nullifier hash has been used already. Used to prevent double-signaling
     mapping(uint256 => bool) internal nullifierHashes;
@@ -79,13 +79,13 @@ contract WorldIDMultiAirdrop {
     //////////////////////////////////////////////////////////////////////////////
 
     /// @notice Deploys a WorldIDAirdrop instance
-    /// @param _worldId The WorldID instance that will manage groups and verify proofs
-    constructor(IWorldID _worldId) {
-        worldId = _worldId;
+    /// @param _worldIdRouter The WorldID router instance that will manage groups and verify proofs
+    constructor(IWorldIDGroups _worldIdRouter) {
+        worldIdRouter = _worldIdRouter;
     }
 
     /// @notice Create a new airdrop
-    /// @param groupId The ID of the Semaphore group that will be eligible to claim this airdrop
+    /// @param groupId The ID of the WorldIDRouter group that will be eligible to claim this airdrop
     /// @param token The ERC20 token that will be airdropped to eligible participants
     /// @param holder The address holding the tokens that will be airdropped
     /// @param amount The amount of tokens that each participant will receive upon claiming
@@ -113,7 +113,7 @@ contract WorldIDMultiAirdrop {
     /// @param receiver The address that will receive the tokens
     /// @param root The of the Merkle tree
     /// @param nullifierHash The nullifier for this proof, preventing double signaling
-    /// @param proof The zero knowledge proof that demostrates the claimer is part of the Semaphore group
+    /// @param proof The zero knowledge proof that demostrates the claimer is part of the WorldID group
     function claim(
         uint256 airdropId,
         address receiver,
@@ -126,7 +126,7 @@ contract WorldIDMultiAirdrop {
         Airdrop memory airdrop = getAirdrop[airdropId];
         if (airdropId == 0 || airdropId >= nextAirdropId) revert InvalidAirdrop();
 
-        worldId.verifyProof(
+        worldIdRouter.verifyProof(
             root,
             airdrop.groupId,
             abi.encodePacked(receiver).hashToField(),
