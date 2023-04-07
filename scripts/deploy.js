@@ -253,13 +253,18 @@ async function setAllowance(config) {
 
   const spinner = ora(`setting allowance...`).start();
 
-  // const contract = new Contract(tokenAddress, ERC20.abi, wallet);
-  // const tx = await contract.approve(holder, amount, {
-  //   maxPriorityFeePerGas: 31e9,
-  //   maxFeePerGas: 60e9,
-  // });
+  try {
+    const data = execSync(
+      `forge script scripts/utils/SetAllowanceERC20.s.sol:SetAllowanceERC20 --fork-url ${config.ethereumRpcUrl} \
+      --etherscan-api-key ${config.ethereumEtherscanApiKey} --broadcast --verify -vvvv`
+    );
+    console.log(data.toString());
 
-  spinner.succeed(`Allowance set for ${config.holderAddress}!`);
+    spinner.succeed(`Allowance set for ${config.holderAddress}!`);
+  } catch (err) {
+    console.error(err);
+    spinner.fail(`Setting allowance for ${config.holderAddress} failed.`);
+  }
 }
 
 async function main() {
@@ -312,6 +317,17 @@ async function main() {
       const options = program.opts();
       let config = await loadConfiguration(options.config);
       await deployMockMultiAirdrop(config);
+      await saveConfiguration(config);
+    });
+
+  program
+    .name('set-allowance')
+    .command('set-allowance')
+    .description('Sets ERC20 token allowance of the holder address to the specified amount.')
+    .action(async () => {
+      const options = program.opts();
+      let config = await loadConfiguration(options.config);
+      await setAllowance(config);
       await saveConfiguration(config);
     });
 }
