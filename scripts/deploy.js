@@ -256,7 +256,7 @@ async function setAllowance(config) {
   try {
     const data = execSync(
       `forge script scripts/utils/SetAllowanceERC20.s.sol:SetAllowanceERC20 --fork-url ${config.ethereumRpcUrl} \
-      --etherscan-api-key ${config.ethereumEtherscanApiKey} --broadcast --verify -vvvv`
+      --broadcast -vvvv`
     );
     console.log(data.toString());
 
