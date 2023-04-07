@@ -1,5 +1,10 @@
 cache/
 out/
+
+**/node_modules
+
 remappings.txt
-node_modules
+
+script/.deploy-config.json
 .env
+

@@ -8,6 +8,17 @@ test:; forge test -vvv --gas-report
 # Deploy contracts
 deploy:; node --no-warnings scripts/deploy.js
 
+# ===== Deployment Rules ==============================================================================================
+
+# Deploy contracts 
+deploy-airdrop: install build; node --no-warnings script/deploy.js deploy-airdrop
+
+deploy-multi-airdrop: install build; node --no-warnings script/deploy.js deploy-multi-airdrop
+
+mock-airdrop: install build; node --no-warnings script/deploy.js mock-airdrop
+
+mock-multi-airdrop: install build; node --no-warnings script/deploy.js mock-multi-airdrop
+
 # ===== Utility Rules =================================================================================================
 
 # Format the solidity code.
