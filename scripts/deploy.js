@@ -268,8 +268,6 @@ async function setAllowance(config) {
 }
 
 async function main() {
-  let config = await loadConfiguration();
-
   const program = new Command();
 
   program
