@@ -30,7 +30,7 @@ Once you have everything installed, you can run `make` from the base directory t
 <!-- WORLD-ID-SHARED-README-TAG:START - Do not remove or modify this section directly -->
 <!-- The contents of this file are inserted to all World ID repositories to provide general context on World ID. -->
 
-## <img align="left" width="28" height="28" src="https://raw.githubusercontent.com/worldcoin/world-id-docs/main/public/images/shared-readme/readme-orb.png" alt="" style="margin-right: 0;" /> About World ID
+## <img align="left" width="28" height="28" src="https://raw.githubusercontent.com/worldcoin/world-id-docs/main/public/images/shared-readme/readme-world-id.png" alt="" style="margin-right: 0;" /> About World ID
 
 World ID is a protocol that lets you **prove a human is doing an action only once without revealing any personal data**. Stop bots, stop abuse.
 
