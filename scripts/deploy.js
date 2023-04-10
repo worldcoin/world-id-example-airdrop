@@ -6,7 +6,7 @@ import { Command } from 'commander';
 import { execSync } from 'child_process';
 
 const DEFAULT_RPC_URL = 'http://localhost:8545';
-const CONFIG_FILENAME = 'script/.deploy-config.json';
+const CONFIG_FILENAME = 'scripts/.deploy-config.json';
 
 const ask = async question => {
   const rl = readline.createInterface({
@@ -144,7 +144,7 @@ async function getHolderAddress(config) {
     config.holderAddress = process.env.HOLDER_ADDRESS;
   }
   if (!config.holderAddress) {
-    config.holderAddress = await ask('Enter ActionId: ');
+    config.holderAddress = await ask('Enter Holder Address: ');
   }
 }
 
@@ -181,7 +181,7 @@ async function deployAirdrop(config) {
 
   try {
     const data = execSync(
-      `forge script script/WorldIDAirdrop.s.sol:DeployWorldIDAirdrop --fork-url ${config.ethereumRpcUrl} \
+      `forge script scripts/WorldIDAirdrop.s.sol:DeployWorldIDAirdrop --fork-url ${config.ethereumRpcUrl} \
       --etherscan-api-key ${config.ethereumEtherscanApiKey} --broadcast --verify -vvvv`
     );
     console.log(data.toString());
@@ -189,6 +189,24 @@ async function deployAirdrop(config) {
   } catch (err) {
     console.error(err);
     spinner.fail('Deployment of WorldIDAirdrop has failed.');
+  }
+}
+
+async function deployWorldIDIdentityManagerRouterMock(config) {
+  dotenv.config();
+
+  const spinner = ora(`Deploying WorldIDIdentityManagerRouterMock contract...`).start();
+
+  try {
+    const data = execSync(
+      `forge script scripts/WorldIDIdentityManagerRouterMock.s.sol:DeployWorldIDIdentityManagerRouterMock --fork-url ${config.ethereumRpcUrl} \
+      --etherscan-api-key ${config.ethereumEtherscanApiKey} --broadcast -vvvv`
+    );
+    console.log(data.toString());
+    spinner.succeed('Deployed WorldIDIdentityManagerRouterMock contract successfully!');
+  } catch (err) {
+    console.error(err);
+    spinner.fail('Deployment of WorldIDIdentityManagerRouterMock has failed.');
   }
 }
 
@@ -207,8 +225,8 @@ async function deployMockAirdrop(config) {
 
   try {
     const data = execSync(
-      `forge script script/WorldIDAirdrop.s.sol:DeployWorldIDAirdrop --fork-url ${config.ethereumRpcUrl} \
-      --etherscan-api-key ${config.ethereumEtherscanApiKey} --broadcast --verify -vvvv`
+      `forge script scripts/WorldIDAirdrop.s.sol:DeployWorldIDAirdrop --fork-url ${config.ethereumRpcUrl} \
+      --etherscan-api-key ${config.ethereumEtherscanApiKey} --broadcast -vvvv`
     );
     console.log(data.toString());
     spinner.succeed('Deployed WorldIDAirdrop contract successfully!');

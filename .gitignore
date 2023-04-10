@@ -5,6 +5,6 @@ out/
 
 remappings.txt
 
-script/.deploy-config.json
+scripts/.deploy-config.json
 .env
 
