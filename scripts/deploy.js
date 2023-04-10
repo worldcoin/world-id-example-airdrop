@@ -252,7 +252,7 @@ async function deployMockMultiAirdrop(config) {
   try {
     const data = execSync(
       `forge script scripts/WorldIDMultiAirdrop.s.sol:DeployWorldIDMultiAirdrop --fork-url ${config.ethereumRpcUrl} \
-      --etherscan-api-key ${config.ethereumEtherscanApiKey} --broadcast --verify -vvvv`
+      --etherscan-api-key ${config.ethereumEtherscanApiKey} --broadcast -vvvv`
     );
     console.log(data.toString());
     spinner.succeed('Deployed WorldIDMultiAirdrop contract successfully!');
