@@ -328,6 +328,8 @@ async function main() {
       await setAllowance(config);
       await saveConfiguration(config);
     });
+
+  await program.parseAsync();
 }
 
 main().then(() => process.exit(0));
