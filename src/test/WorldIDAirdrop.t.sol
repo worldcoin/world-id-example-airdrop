@@ -1,191 +1,106 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.10;
+pragma solidity ^0.8.19;
 
-import { Vm } from 'forge-std/Vm.sol';
-import { DSTest } from 'ds-test/test.sol';
-import { Semaphore } from 'world-id-contracts/Semaphore.sol';
-import { TestERC20 } from './mock/TestERC20.sol';
-import { TypeConverter } from './utils/TypeConverter.sol';
-import { WorldIDAirdrop } from '../WorldIDAirdrop.sol';
+import {PRBTest} from "@prb/test/PRBTest.sol";
+import {WorldIDIdentityManagerRouterMock} from "src/test/mock/WorldIDIdentityManagerRouterMock.sol";
+import {TestERC20} from "./mock/TestERC20.sol";
+import {WorldIDAirdrop} from "../WorldIDAirdrop.sol";
 
-contract User {}
-
-contract WorldIDAirdropTest is DSTest {
-    using TypeConverter for address;
-
+/// @title World ID Airdrop Tests
+/// @notice Contains tests for the template airdrop contracts for WorldID users
+/// @author Worldcoin
+/// @dev These contracts mock the identity manager (never reverts) and tests the airdrop
+/// functionality for a single airdrop.
+contract WorldIDAirdropTest is PRBTest {
     event AmountUpdated(uint256 amount);
 
-    User internal user;
+    address public user;
     uint256 internal groupId;
+    uint256[8] internal proof;
+    address public manager;
     TestERC20 internal token;
-    Semaphore internal semaphore;
+    WorldIDIdentityManagerRouterMock internal worldIDIdentityManagerRouterMock;
     WorldIDAirdrop internal airdrop;
-    Vm internal hevm = Vm(HEVM_ADDRESS);
 
     function setUp() public {
         groupId = 1;
-        user = new User();
+        user = address(0x2);
         token = new TestERC20();
-        semaphore = new Semaphore();
-        airdrop = new WorldIDAirdrop(semaphore, groupId, 'wld_test_12345678', token, address(user), 1 ether);
+        worldIDIdentityManagerRouterMock = new WorldIDIdentityManagerRouterMock();
 
-        hevm.label(address(this), 'Sender');
-        hevm.label(address(user), 'Holder');
-        hevm.label(address(token), 'Token');
-        hevm.label(address(semaphore), 'Semaphore');
-        hevm.label(address(airdrop), 'WorldIDAirdrop');
+        manager = address(0x1);
+
+        proof = [0, 0, 0, 0, 0, 0, 0, 0];
+
+        vm.prank(manager);
+        airdrop =
+        new WorldIDAirdrop(worldIDIdentityManagerRouterMock, groupId, 'wld_test_12345678', token, address(user), 1 ether);
+
+        ///////////////////////////////////////////////////////////////////
+        ///                            LABELS                           ///
+        ///////////////////////////////////////////////////////////////////
+
+        vm.label(address(this), "Sender");
+        vm.label(user, "Holder");
+        vm.label(manager, "Manager");
+        vm.label(address(token), "Token");
+        vm.label(address(worldIDIdentityManagerRouterMock), "WorldIDIdentityManagerRouterMock");
+        vm.label(address(airdrop), "WorldIDAirdrop");
 
         // Issue some tokens to the user address, to be airdropped from the contract
         token.issue(address(user), 10 ether);
 
         // Approve spending from the airdrop contract
-        hevm.prank(address(user));
+        vm.prank(address(user));
         token.approve(address(airdrop), type(uint256).max);
     }
 
-    function genIdentityCommitment() internal returns (uint256) {
-        string[] memory ffiArgs = new string[](2);
-        ffiArgs[0] = 'node';
-        ffiArgs[1] = 'src/test/scripts/generate-commitment.js';
+    /// @notice Tests that the user is able to claim tokens if the World ID proof is valid
+    function testCanClaim(uint256 worldIDRoot, uint256 nullifierHash) public {
+        vm.assume(worldIDRoot != 0 && nullifierHash != 0);
 
-        bytes memory returnData = hevm.ffi(ffiArgs);
-        return abi.decode(returnData, (uint256));
-    }
-
-    function genProof() internal returns (uint256, uint256[8] memory proof) {
-        string[] memory ffiArgs = new string[](4);
-        ffiArgs[0] = 'node';
-        ffiArgs[1] = '--no-warnings';
-        ffiArgs[2] = 'src/test/scripts/generate-proof.js';
-        ffiArgs[3] = address(this).toString();
-
-        bytes memory returnData = hevm.ffi(ffiArgs);
-
-        return abi.decode(returnData, (uint256, uint256[8]));
-    }
-
-    function testCanClaim() public {
         assertEq(token.balanceOf(address(this)), 0);
 
-        semaphore.createGroup(groupId, 20, 0);
-        semaphore.addMember(groupId, genIdentityCommitment());
-
-        (uint256 nullifierHash, uint256[8] memory proof) = genProof();
-        airdrop.claim(address(this), semaphore.getRoot(groupId), nullifierHash, proof);
+        airdrop.claim(address(this), worldIDRoot, nullifierHash, proof);
 
         assertEq(token.balanceOf(address(this)), airdrop.airdropAmount());
     }
 
-    function testCanClaimAfterNewMemberAdded() public {
+    /// @notice Tests that nullifier hash for the same action cannot be consumed twice
+    function testCannotDoubleClaim(uint256 worldIDRoot, uint256 nullifierHash) public {
+        vm.assume(worldIDRoot != 0 && nullifierHash != 0);
+
         assertEq(token.balanceOf(address(this)), 0);
 
-        semaphore.createGroup(groupId, 20, 0);
-        semaphore.addMember(groupId, genIdentityCommitment());
-        uint256 root = semaphore.getRoot(groupId);
-        semaphore.addMember(groupId, 1);
+        airdrop.claim(address(this), worldIDRoot, nullifierHash, proof);
 
-        (uint256 nullifierHash, uint256[8] memory proof) = genProof();
-        airdrop.claim(address(this), root, nullifierHash, proof);
+        assertEq(token.balanceOf(address(this)), airdrop.airdropAmount());
+
+        vm.expectRevert(WorldIDAirdrop.InvalidNullifier.selector);
+        airdrop.claim(address(this), worldIDRoot, nullifierHash, proof);
 
         assertEq(token.balanceOf(address(this)), airdrop.airdropAmount());
     }
 
-    function testCannotClaimHoursAfterNewMemberAdded() public {
-        assertEq(token.balanceOf(address(this)), 0);
-
-        semaphore.createGroup(groupId, 20, 0);
-        semaphore.addMember(groupId, genIdentityCommitment());
-        uint256 root = semaphore.getRoot(groupId);
-        semaphore.addMember(groupId, 1);
-
-        hevm.warp(block.timestamp + 7 days + 1 hours);
-
-        (uint256 nullifierHash, uint256[8] memory proof) = genProof();
-        hevm.expectRevert(Semaphore.InvalidRoot.selector);
-        airdrop.claim(address(this), root, nullifierHash, proof);
-
-        assertEq(token.balanceOf(address(this)), 0);
-    }
-
-    function testCannotDoubleClaim() public {
-        assertEq(token.balanceOf(address(this)), 0);
-
-        semaphore.createGroup(groupId, 20, 0);
-        semaphore.addMember(groupId, genIdentityCommitment());
-
-        (uint256 nullifierHash, uint256[8] memory proof) = genProof();
-        airdrop.claim(address(this), semaphore.getRoot(groupId), nullifierHash, proof);
-
-        assertEq(token.balanceOf(address(this)), airdrop.airdropAmount());
-
-        uint256 root = semaphore.getRoot(groupId);
-        hevm.expectRevert(WorldIDAirdrop.InvalidNullifier.selector);
-        airdrop.claim(address(this), root, nullifierHash, proof);
-
-        assertEq(token.balanceOf(address(this)), airdrop.airdropAmount());
-    }
-
-    function testCannotClaimIfNotMember() public {
-        assertEq(token.balanceOf(address(this)), 0);
-
-        semaphore.createGroup(groupId, 20, 0);
-        semaphore.addMember(groupId, 1);
-
-        uint256 root = semaphore.getRoot(groupId);
-        (uint256 nullifierHash, uint256[8] memory proof) = genProof();
-
-        hevm.expectRevert(abi.encodeWithSignature('InvalidProof()'));
-        airdrop.claim(address(this), root, nullifierHash, proof);
-
-        assertEq(token.balanceOf(address(this)), 0);
-    }
-
-    function testCannotClaimWithInvalidSignal() public {
-        assertEq(token.balanceOf(address(this)), 0);
-
-        semaphore.createGroup(groupId, 20, 0);
-        semaphore.addMember(groupId, genIdentityCommitment());
-
-        (uint256 nullifierHash, uint256[8] memory proof) = genProof();
-
-        uint256 root = semaphore.getRoot(groupId);
-        hevm.expectRevert(abi.encodeWithSignature('InvalidProof()'));
-        airdrop.claim(address(user), root, nullifierHash, proof);
-
-        assertEq(token.balanceOf(address(this)), 0);
-    }
-
-    function testCannotClaimWithInvalidProof() public {
-        assertEq(token.balanceOf(address(this)), 0);
-
-        semaphore.createGroup(groupId, 20, 0);
-        semaphore.addMember(groupId, genIdentityCommitment());
-
-        (uint256 nullifierHash, uint256[8] memory proof) = genProof();
-        proof[0] ^= 42;
-
-        uint256 root = semaphore.getRoot(groupId);
-        hevm.expectRevert(abi.encodeWithSignature('InvalidProof()'));
-        airdrop.claim(address(this), root, nullifierHash, proof);
-
-        assertEq(token.balanceOf(address(this)), 0);
-    }
-
+    /// @notice Tests that the manager can update the airdrop amount
     function testUpdateAirdropAmount() public {
         assertEq(airdrop.airdropAmount(), 1 ether);
 
-        hevm.expectEmit(false, false, false, true);
+        vm.expectEmit(false, false, false, true);
         emit AmountUpdated(2 ether);
+        vm.prank(manager);
         airdrop.updateAmount(2 ether);
 
         assertEq(airdrop.airdropAmount(), 2 ether);
     }
 
-    function testCannotUpdateAirdropAmountIfNotManager() public {
+    /// @notice Tests that anyone that is not the manager can't update the airdrop amount
+    function testCannotUpdateAirdropAmountIfNotManager(address notManager) public {
+        vm.assume(notManager != manager && notManager != address(0));
         assertEq(airdrop.airdropAmount(), 1 ether);
 
-        hevm.expectRevert(WorldIDAirdrop.Unauthorized.selector);
-        hevm.prank(address(user));
+        vm.expectRevert(WorldIDAirdrop.Unauthorized.selector);
+        vm.prank(notManager);
         airdrop.updateAmount(2 ether);
 
         assertEq(airdrop.airdropAmount(), 1 ether);

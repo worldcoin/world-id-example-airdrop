@@ -1,5 +1,31 @@
-cache/
-out/
-remappings.txt
+# directories
+.yarn/*
+!.yarn/patches
+!.yarn/releases
+!.yarn/plugins
+!.yarn/sdks
+!.yarn/versions
+**/cache
+**/node_modules
+**/out
 node_modules
-.env
+.vscode
+
+.DS_Store
+.pnp.*
+
+# files
+*.env
+*.log
+
+scripts/.deploy-config.json
+yarn-debug.log*
+yarn-error.log*
+
+# broadcasts
+!/broadcast
+/broadcast/*
+/broadcast/*/31337/
+
+# remappings
+remappings.txt

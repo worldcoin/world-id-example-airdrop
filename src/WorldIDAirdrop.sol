@@ -1,13 +1,14 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.10;
+pragma solidity ^0.8.19;
 
-import { ERC20 } from 'solmate/tokens/ERC20.sol';
-import { SafeTransferLib } from 'solmate/utils/SafeTransferLib.sol';
-import { IWorldID } from 'world-id-contracts/interfaces/IWorldID.sol';
-import { ByteHasher } from 'world-id-contracts/libraries/ByteHasher.sol';
+import {ERC20} from "solmate/tokens/ERC20.sol";
+import {SafeTransferLib} from "solmate/utils/SafeTransferLib.sol";
+import {IWorldID} from "world-id-contracts/interfaces/IWorldID.sol";
+import {IWorldIDGroups} from "world-id-contracts/interfaces/IWorldIDGroups.sol";
+import {ByteHasher} from "world-id-contracts/libraries/ByteHasher.sol";
 
 /// @title World ID Airdrop example
-/// @author Miguel Piedrafita
+/// @author Worldcoin
 /// @notice Template contract for airdropping tokens to World ID users
 contract WorldIDAirdrop {
     using ByteHasher for bytes;
@@ -38,8 +39,8 @@ contract WorldIDAirdrop {
     ///                              CONFIG STORAGE                            ///
     //////////////////////////////////////////////////////////////////////////////
 
-    /// @dev The WorldID instance that will be used for managing groups and verifying proofs
-    IWorldID internal immutable worldId;
+    /// @dev The WorldID router instance that will be used for managing groups and verifying proofs
+    IWorldIDGroups internal immutable worldIdRouter;
 
     /// @dev The World ID group whose participants can claim this airdrop
     uint256 internal immutable groupId;
@@ -68,21 +69,22 @@ contract WorldIDAirdrop {
     //////////////////////////////////////////////////////////////////////////////
 
     /// @notice Deploys a WorldIDAirdrop instance
-    /// @param _worldId The WorldID instance that will manage groups and verify proofs
+    /// @param _worldIdRouter The WorldID router instance that will manage groups and verify proofs
     /// @param _groupId The ID of the Semaphore group World ID is using (`1`)
     /// @param _actionId The actionId as registered in the developer portal
     /// @param _token The ERC20 token that will be airdropped to eligible participants
     /// @param _holder The address holding the tokens that will be airdropped
     /// @param _airdropAmount The amount of tokens that each participant will receive upon claiming
+    /// @dev hashToField function docs are in lib/world-id-contracts/src/libraries/ByteHasher.sol
     constructor(
-        IWorldID _worldId,
+        IWorldIDGroups _worldIdRouter,
         uint256 _groupId,
         string memory _actionId,
         ERC20 _token,
         address _holder,
         uint256 _airdropAmount
     ) {
-        worldId = _worldId;
+        worldIdRouter = _worldIdRouter;
         groupId = _groupId;
         actionId = abi.encodePacked(_actionId).hashToField();
         token = _token;
@@ -96,22 +98,20 @@ contract WorldIDAirdrop {
 
     /// @notice Claim the airdrop
     /// @param receiver The address that will receive the tokens (this is also the signal of the ZKP)
-    /// @param root The root of the Merkle tree
+    /// @param root The root of the Merkle tree (signup-sequencer or world-id-contracts provides this)
     /// @param nullifierHash The nullifier for this proof, preventing double signaling
     /// @param proof The zero knowledge proof that demonstrates the claimer has a verified World ID
-    function claim(
-        address receiver,
-        uint256 root,
-        uint256 nullifierHash,
-        uint256[8] calldata proof
-    ) public {
+    /// @dev hashToField function docs are in lib/world-id-contracts/src/libraries/ByteHasher.sol
+    function claim(address receiver, uint256 root, uint256 nullifierHash, uint256[8] calldata proof)
+        public
+    {
         if (nullifierHashes[nullifierHash]) revert InvalidNullifier();
-        worldId.verifyProof(
-            root,
+        worldIdRouter.verifyProof(
             groupId,
+            root,
             abi.encodePacked(receiver).hashToField(), // The signal of the proof
             nullifierHash,
-            actionId,
+            abi.encodePacked(actionId).hashToField(), // The external nullifier hash
             proof
         );
 
