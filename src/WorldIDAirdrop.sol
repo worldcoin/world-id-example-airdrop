@@ -75,6 +75,7 @@ contract WorldIDAirdrop {
     /// @param _token The ERC20 token that will be airdropped to eligible participants
     /// @param _holder The address holding the tokens that will be airdropped
     /// @param _airdropAmount The amount of tokens that each participant will receive upon claiming
+    /// @dev hashToField function docs are in lib/world-id-contracts/src/libraries/ByteHasher.sol
     constructor(
         IWorldIDGroups _worldIdRouter,
         uint256 _groupId,
@@ -100,7 +101,7 @@ contract WorldIDAirdrop {
     /// @param root The root of the Merkle tree
     /// @param nullifierHash The nullifier for this proof, preventing double signaling
     /// @param proof The zero knowledge proof that demonstrates the claimer has a verified World ID
-
+    /// @dev hashToField function docs are in lib/world-id-contracts/src/libraries/ByteHasher.sol
     function claim(address receiver, uint256 root, uint256 nullifierHash, uint256[8] calldata proof)
         public
     {

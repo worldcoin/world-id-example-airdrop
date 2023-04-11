@@ -114,6 +114,7 @@ contract WorldIDMultiAirdrop {
     /// @param root The of the Merkle tree
     /// @param nullifierHash The nullifier for this proof, preventing double signaling
     /// @param proof The zero knowledge proof that demostrates the claimer is part of the WorldID group
+    /// @dev hashToField function docs are in lib/world-id-contracts/src/libraries/ByteHasher.sol
     function claim(
         uint256 airdropId,
         address receiver,
