@@ -98,7 +98,7 @@ contract WorldIDAirdrop {
 
     /// @notice Claim the airdrop
     /// @param receiver The address that will receive the tokens (this is also the signal of the ZKP)
-    /// @param root The root of the Merkle tree
+    /// @param root The root of the Merkle tree (signup-sequencer or world-id-contracts provides this)
     /// @param nullifierHash The nullifier for this proof, preventing double signaling
     /// @param proof The zero knowledge proof that demonstrates the claimer has a verified World ID
     /// @dev hashToField function docs are in lib/world-id-contracts/src/libraries/ByteHasher.sol
