@@ -7,14 +7,5 @@
   "useTabs": false,
   "bracketSpacing": true,
   "arrowParens": "avoid",
-  "proseWrap": "always",
-  "overrides": [
-    {
-      "files": "*.sol",
-      "options": {
-        "explicitTypes": "always",
-        "compiler": "0.8.12"
-      }
-    }
-  ]
+  "proseWrap": "always"
 }

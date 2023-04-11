@@ -4,19 +4,28 @@ pragma solidity ^0.8.19;
 import {PRBTest} from "@prb/test/PRBTest.sol";
 import {WorldIDIdentityManagerRouterMock} from "src/test/mock/WorldIDIdentityManagerRouterMock.sol";
 import {TestERC20, ERC20} from "src/test/mock/TestERC20.sol";
-import {TypeConverter} from "src/test/utils/TypeConverter.sol";
 import {WorldIDMultiAirdrop} from "src/WorldIDMultiAirdrop.sol";
 
-contract User {}
-
+/// @title World ID Multi Airdrop tests
+/// @notice Contains tests for the aidrop contracts of various tokens to the World ID users
+/// @author Worldcoin
+/// @dev Tests that multiple airdrops can be created and later claimed by World ID users that submit
+/// valid World ID proofs.
 contract WorldIDMultiAirdropTest is PRBTest {
-    using TypeConverter for address;
+    ///////////////////////////////////////////////////////////////////
+    ///                            EVENTS                           ///
+    ///////////////////////////////////////////////////////////////////
 
     event AirdropClaimed(uint256 indexed airdropId, address receiver);
     event AirdropCreated(uint256 airdropId, WorldIDMultiAirdrop.Airdrop airdrop);
     event AirdropUpdated(uint256 indexed airdropId, WorldIDMultiAirdrop.Airdrop airdrop);
 
-    User internal user;
+    ///////////////////////////////////////////////////////////////////
+    ///                        CONFIG STORAGE                       ///
+    ///////////////////////////////////////////////////////////////////
+
+    address public user;
+    address public airdropOwner;
     uint256 internal groupId;
     TestERC20 internal token;
     uint256[8] internal proof;
@@ -25,14 +34,17 @@ contract WorldIDMultiAirdropTest is PRBTest {
 
     function setUp() public {
         groupId = 1;
-        user = new User();
+        user = address(0x2);
         token = new TestERC20();
+        airdropOwner = address(0x1);
         worldIDIdentityManagerRouterMock = new WorldIDIdentityManagerRouterMock();
+        vm.prank(airdropOwner);
         airdrop = new WorldIDMultiAirdrop(worldIDIdentityManagerRouterMock);
         proof = [0, 0, 0, 0, 0, 0, 0, 0];
 
         vm.label(address(this), "Sender");
-        vm.label(address(user), "Holder");
+        vm.label(user, "Holder");
+        vm.label(airdropOwner, "Airdrop Owner");
         vm.label(address(token), "Token");
         vm.label(address(worldIDIdentityManagerRouterMock), "WorldIDIdentityManagerRouterMock");
         vm.label(address(airdrop), "WorldIDMultiAirdrop");
@@ -45,6 +57,7 @@ contract WorldIDMultiAirdropTest is PRBTest {
         token.approve(address(airdrop), type(uint256).max);
     }
 
+    /// @notice Tests that you can create an airdrop
     function testCanCreateAirdrop() public {
         vm.expectEmit(false, false, false, true);
         emit AirdropCreated(
@@ -69,6 +82,7 @@ contract WorldIDMultiAirdropTest is PRBTest {
         assertEq(amount, 1 ether);
     }
 
+    /// @notice Tests that a user can claim a specific airdrop if they provide a valid World ID proof
     /// @dev mocks verifyProof inside airdrop.claim(), always goes through
     function testCanClaim(uint256 worldIDRoot, uint256 nullifierHash) public {
         vm.assume(worldIDRoot != 0 && nullifierHash != 0);
@@ -84,6 +98,7 @@ contract WorldIDMultiAirdropTest is PRBTest {
         assertEq(token.balanceOf(address(this)), 1 ether);
     }
 
+    /// @notice Tests that a user can't claim an airdrop that hasn't been defined in the contract.
     /// @dev mocks verifyProof inside airdrop.claim(), always goes through
     function testCannotClaimNonExistantAirdrop(uint256 worldIDRoot, uint256 nullifierHash) public {
         vm.assume(worldIDRoot != 0 && nullifierHash != 0);
@@ -96,19 +111,7 @@ contract WorldIDMultiAirdropTest is PRBTest {
         assertEq(token.balanceOf(address(this)), 0);
     }
 
-    /// @dev mocks verifyProof inside airdrop.claim(), always goes through
-    function testCanClaimAfterNewMemberAdded(uint256 worldIDRoot, uint256 nullifierHash) public {
-        vm.assume(worldIDRoot != 0 && nullifierHash != 0);
-
-        assertEq(token.balanceOf(address(this)), 0);
-
-        airdrop.createAirdrop(groupId, token, address(user), 1 ether);
-
-        airdrop.claim(1, address(this), worldIDRoot, nullifierHash, proof);
-
-        assertEq(token.balanceOf(address(this)), 1 ether);
-    }
-
+    /// @notice Tests that a user can't claim an airdrop twice (consume the same nullifier hash twice).
     function testCannotDoubleClaim(uint256 worldIDRoot, uint256 nullifierHash) public {
         vm.assume(worldIDRoot != 0 && nullifierHash != 0);
 
@@ -126,7 +129,9 @@ contract WorldIDMultiAirdropTest is PRBTest {
         assertEq(token.balanceOf(address(this)), 1 ether);
     }
 
+    /// @notice Tests that the creator of the airdrop can update the details of the airdrop.
     function testCanUpdateAirdropDetails() public {
+        vm.prank(airdropOwner);
         airdrop.createAirdrop(groupId, token, address(user), 1 ether);
 
         (
@@ -139,7 +144,7 @@ contract WorldIDMultiAirdropTest is PRBTest {
 
         assertEq(oldGroupId, groupId);
         assertEq(address(oldToken), address(token));
-        assertEq(oldManager, address(this));
+        assertEq(oldManager, airdropOwner);
         assertEq(oldHolder, address(user));
         assertEq(oldAmount, 1 ether);
 
@@ -153,6 +158,7 @@ contract WorldIDMultiAirdropTest is PRBTest {
 
         vm.expectEmit(true, false, false, true);
         emit AirdropUpdated(1, newDetails);
+        vm.prank(airdropOwner);
         airdrop.updateDetails(1, newDetails);
 
         (uint256 _groupId, ERC20 _token, address manager, address _holder, uint256 amount) =
@@ -165,7 +171,11 @@ contract WorldIDMultiAirdropTest is PRBTest {
         assertEq(amount, newDetails.amount);
     }
 
-    function testNonOwnerCannotUpdateAirdropDetails() public {
+    /// @notice Tests that a non owner can't update details of an existing airdrop.
+    function testNonOwnerCannotUpdateAirdropDetails(address notAirdropOwner) public {
+        vm.assume(notAirdropOwner != airdropOwner && notAirdropOwner != address(0));
+
+        vm.prank(airdropOwner);
         airdrop.createAirdrop(groupId, token, address(user), 1 ether);
 
         (
@@ -178,11 +188,11 @@ contract WorldIDMultiAirdropTest is PRBTest {
 
         assertEq(oldGroupId, groupId);
         assertEq(address(oldToken), address(token));
-        assertEq(oldManager, address(this));
+        assertEq(oldManager, airdropOwner);
         assertEq(oldHolder, address(user));
         assertEq(oldAmount, 1 ether);
 
-        vm.prank(address(user));
+        vm.prank(notAirdropOwner);
         vm.expectRevert(WorldIDMultiAirdrop.Unauthorized.selector);
         airdrop.updateDetails(
             1,
@@ -200,7 +210,7 @@ contract WorldIDMultiAirdropTest is PRBTest {
 
         assertEq(_groupId, groupId);
         assertEq(address(_token), address(token));
-        assertEq(manager, address(this));
+        assertEq(manager, airdropOwner);
         assertEq(_holder, address(user));
         assertEq(amount, 1 ether);
     }

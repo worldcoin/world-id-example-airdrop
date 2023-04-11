@@ -8,8 +8,7 @@ import {IWorldIDGroups} from "world-id-contracts/interfaces/IWorldIDGroups.sol";
 import {ByteHasher} from "world-id-contracts/libraries/ByteHasher.sol";
 
 /// @title World ID Airdrop example
-/// @author Miguel Piedrafita
-/// @author dcbuild3r
+/// @author Worldcoin
 /// @notice Template contract for airdropping tokens to World ID users
 contract WorldIDAirdrop {
     using ByteHasher for bytes;
@@ -101,6 +100,7 @@ contract WorldIDAirdrop {
     /// @param root The root of the Merkle tree
     /// @param nullifierHash The nullifier for this proof, preventing double signaling
     /// @param proof The zero knowledge proof that demonstrates the claimer has a verified World ID
+
     function claim(address receiver, uint256 root, uint256 nullifierHash, uint256[8] calldata proof)
         public
     {

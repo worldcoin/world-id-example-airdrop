@@ -7,7 +7,7 @@ import {IWorldIDGroups} from "world-id-contracts/interfaces/IWorldIDGroups.sol";
 import {ByteHasher} from "world-id-contracts/libraries/ByteHasher.sol";
 
 /// @title World ID Multiple Airdrop Manager
-/// @author Miguel Piedrafita
+/// @author Worldcoin
 /// @notice Template contract for managing multiple airdrops to World ID members.
 contract WorldIDMultiAirdrop {
     using ByteHasher for bytes;
