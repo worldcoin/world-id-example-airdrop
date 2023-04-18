@@ -86,7 +86,7 @@ contract WorldIDAirdrop {
     ) {
         worldIdRouter = _worldIdRouter;
         groupId = _groupId;
-        actionId = _actionId;
+        actionId = abi.encodePacked(actionId).hashToField();
         token = _token;
         holder = _holder;
         airdropAmount = _airdropAmount;
@@ -111,7 +111,7 @@ contract WorldIDAirdrop {
             root,
             abi.encodePacked(receiver).hashToField(), // The signal of the proof
             nullifierHash,
-            abi.encodePacked(actionId).hashToField(), // The external nullifier hash
+            actionId, // The external nullifier hash
             proof
         );
 
