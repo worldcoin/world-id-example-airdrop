@@ -68,6 +68,8 @@ contract WorldIDMultiAirdrop {
     /// @dev The WorldID router instance that will be used for managing groups and verifying proofs
     IWorldIDGroups internal immutable worldIdRouter;
 
+    address internal immutable owner = msg.sender;
+
     /// @dev Whether a nullifier hash has been used already. Used to prevent double-signaling
     mapping(uint256 => bool) internal nullifierHashes;
 
@@ -90,6 +92,8 @@ contract WorldIDMultiAirdrop {
     /// @param holder The address holding the tokens that will be airdropped
     /// @param amount The amount of tokens that each participant will receive upon claiming
     function createAirdrop(uint256 groupId, ERC20 token, address holder, uint256 amount) public {
+        require(msg.sender == owner, "Sender must be owner");
+
         Airdrop memory airdrop = Airdrop({
             groupId: groupId,
             token: token,
@@ -128,8 +132,8 @@ contract WorldIDMultiAirdrop {
         if (airdropId == 0 || airdropId >= nextAirdropId) revert InvalidAirdrop();
 
         worldIdRouter.verifyProof(
-            root,
             airdrop.groupId,
+            root,
             abi.encodePacked(receiver).hashToField(),
             nullifierHash,
             abi.encodePacked(address(this), airdropId).hashToField(),
