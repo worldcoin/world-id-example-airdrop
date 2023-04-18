@@ -86,7 +86,7 @@ contract WorldIDAirdrop {
     ) {
         worldIdRouter = _worldIdRouter;
         groupId = _groupId;
-        actionId = abi.encodePacked(_actionId).hashToField();
+        actionId = _actionId;
         token = _token;
         holder = _holder;
         airdropAmount = _airdropAmount;
