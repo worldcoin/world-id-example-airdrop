@@ -262,6 +262,33 @@ async function deployMockMultiAirdrop(config) {
   }
 }
 
+// TODO: Couldn't get it to work :(
+async function deployMultiAirdrop(config) {
+  dotenv.config();
+
+  await getPrivateKey(config);
+  await getEthereumRpcUrl(config);
+  await getEtherscanApiKey(config);
+  await getWorldIDIdentityManagerRouterAddress(config);
+  await saveConfiguration(config);
+  await getAirdropParameters(config);
+
+  const spinner = ora(`Deploying WorldIDAirdrop contract...`).start();
+
+  try {
+    console.log('x');
+    const data = execSync(
+      `forge script scripts/WorldIDMultiAirdrop.s.sol:DeployWorldIDMultiAirdrop --legacy --fork-url ${config.ethereumRpcUrl} --broadcast -vvvv`
+    );
+    console.log('x');
+    console.log(data.toString());
+    spinner.succeed('Deployed WorldIDMultiAirdrop contract successfully!');
+  } catch (err) {
+    console.error(err);
+    spinner.fail('Deployment of WorldIDMultiAirdrop has failed.');
+  }
+}
+
 async function setAllowance(config) {
   await getErc20Address(config);
   await getHolderAddress(config);
