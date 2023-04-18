@@ -263,6 +263,22 @@ async function deployMockMultiAirdrop(config) {
 }
 
 // TODO: Couldn't get it to work :(
+// You can use the following instead
+// To deploy Multi Airdrop:
+// ```
+// forge create --private-key $PRIVATE_KEY --rpc-url $RPC_URL src/WorldIDMultiAirdrop.sol:WorldIDMultiAirdrop --constructor-args $ADDRESS_OF_WORLD_ID_ROUTER
+// ```
+//
+// To encode args for verification:
+// ```
+// cast abi-encode 'constructor(address)' $ADDRESS_OF_WORLD_ID_ROUTER
+// ```
+//
+// To verify:
+//
+// ```
+// forge verify-contract $ADDRESS_OF_MULTI_AIRDROP src/WorldIDMultiAirdrop.sol:WorldIDMultiAirdrop --etherscan-api-key $API_KEY --constructor-args $CONSTRUCTOR_ARGS_FROM_CAST_ENCODE --chain 137
+// ```
 async function deployMultiAirdrop(config) {
   dotenv.config();
 
