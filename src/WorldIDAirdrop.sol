@@ -111,7 +111,7 @@ contract WorldIDAirdrop {
             root,
             abi.encodePacked(receiver).hashToField(), // The signal of the proof
             nullifierHash,
-            abi.encodePacked(actionId).hashToField(), // The external nullifier hash
+            actionId, // The external nullifier hash
             proof
         );
 
