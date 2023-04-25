@@ -262,6 +262,49 @@ async function deployMockMultiAirdrop(config) {
   }
 }
 
+// TODO: Couldn't get it to work :(
+// You can use the following instead
+// To deploy Multi Airdrop:
+// ```
+// forge create --private-key $PRIVATE_KEY --rpc-url $RPC_URL src/WorldIDMultiAirdrop.sol:WorldIDMultiAirdrop --constructor-args $ADDRESS_OF_WORLD_ID_ROUTER
+// ```
+//
+// To encode args for verification:
+// ```
+// cast abi-encode 'constructor(address)' $ADDRESS_OF_WORLD_ID_ROUTER
+// ```
+//
+// To verify:
+//
+// ```
+// forge verify-contract $ADDRESS_OF_MULTI_AIRDROP src/WorldIDMultiAirdrop.sol:WorldIDMultiAirdrop --etherscan-api-key $API_KEY --constructor-args $CONSTRUCTOR_ARGS_FROM_CAST_ENCODE --chain 137
+// ```
+async function deployMultiAirdrop(config) {
+  dotenv.config();
+
+  await getPrivateKey(config);
+  await getEthereumRpcUrl(config);
+  await getEtherscanApiKey(config);
+  await getWorldIDIdentityManagerRouterAddress(config);
+  await saveConfiguration(config);
+  await getAirdropParameters(config);
+
+  const spinner = ora(`Deploying WorldIDAirdrop contract...`).start();
+
+  try {
+    console.log('x');
+    const data = execSync(
+      `forge script scripts/WorldIDMultiAirdrop.s.sol:DeployWorldIDMultiAirdrop --legacy --fork-url ${config.ethereumRpcUrl} --broadcast -vvvv`
+    );
+    console.log('x');
+    console.log(data.toString());
+    spinner.succeed('Deployed WorldIDMultiAirdrop contract successfully!');
+  } catch (err) {
+    console.error(err);
+    spinner.fail('Deployment of WorldIDMultiAirdrop has failed.');
+  }
+}
+
 async function setAllowance(config) {
   await getErc20Address(config);
   await getHolderAddress(config);

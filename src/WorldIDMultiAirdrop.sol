@@ -5,11 +5,12 @@ import {ERC20} from "solmate/tokens/ERC20.sol";
 import {SafeTransferLib} from "solmate/utils/SafeTransferLib.sol";
 import {IWorldIDGroups} from "world-id-contracts/interfaces/IWorldIDGroups.sol";
 import {ByteHasher} from "world-id-contracts/libraries/ByteHasher.sol";
+import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
 /// @title World ID Multiple Airdrop Manager
 /// @author Worldcoin
 /// @notice Template contract for managing multiple airdrops to World ID members.
-contract WorldIDMultiAirdrop {
+contract WorldIDMultiAirdrop is Ownable {
     using ByteHasher for bytes;
 
     ///////////////////////////////////////////////////////////////////////////////
@@ -89,7 +90,8 @@ contract WorldIDMultiAirdrop {
     /// @param token The ERC20 token that will be airdropped to eligible participants
     /// @param holder The address holding the tokens that will be airdropped
     /// @param amount The amount of tokens that each participant will receive upon claiming
-    function createAirdrop(uint256 groupId, ERC20 token, address holder, uint256 amount) public {
+    function createAirdrop(uint256 groupId, ERC20 token, address holder, uint256 amount) public onlyOwner {
+
         Airdrop memory airdrop = Airdrop({
             groupId: groupId,
             token: token,
@@ -128,8 +130,8 @@ contract WorldIDMultiAirdrop {
         if (airdropId == 0 || airdropId >= nextAirdropId) revert InvalidAirdrop();
 
         worldIdRouter.verifyProof(
-            root,
             airdrop.groupId,
+            root,
             abi.encodePacked(receiver).hashToField(),
             nullifierHash,
             abi.encodePacked(address(this), airdropId).hashToField(),

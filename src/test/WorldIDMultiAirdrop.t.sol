@@ -59,17 +59,20 @@ contract WorldIDMultiAirdropTest is PRBTest {
 
     /// @notice Tests that you can create an airdrop
     function testCanCreateAirdrop() public {
+
         vm.expectEmit(false, false, false, true);
         emit AirdropCreated(
             1,
             WorldIDMultiAirdrop.Airdrop({
                 groupId: groupId,
                 token: token,
-                manager: address(this),
+                manager: airdropOwner,
                 holder: address(user),
                 amount: 1 ether
             })
         );
+        
+        vm.prank(airdropOwner);
         airdrop.createAirdrop(groupId, token, address(user), 1 ether);
 
         (uint256 _groupId, ERC20 _token, address manager, address _holder, uint256 amount) =
@@ -77,7 +80,7 @@ contract WorldIDMultiAirdropTest is PRBTest {
 
         assertEq(_groupId, groupId);
         assertEq(address(_token), address(token));
-        assertEq(manager, address(this));
+        assertEq(manager, airdropOwner);
         assertEq(_holder, address(user));
         assertEq(amount, 1 ether);
     }
@@ -89,6 +92,7 @@ contract WorldIDMultiAirdropTest is PRBTest {
 
         assertEq(token.balanceOf(address(this)), 0);
 
+        vm.prank(airdropOwner);
         airdrop.createAirdrop(groupId, token, address(user), 1 ether);
 
         vm.expectEmit(true, false, false, true);
@@ -117,6 +121,7 @@ contract WorldIDMultiAirdropTest is PRBTest {
 
         assertEq(token.balanceOf(address(this)), 0);
 
+        vm.prank(airdropOwner);
         airdrop.createAirdrop(groupId, token, address(user), 1 ether);
 
         airdrop.claim(1, address(this), worldIDRoot, nullifierHash, proof);
