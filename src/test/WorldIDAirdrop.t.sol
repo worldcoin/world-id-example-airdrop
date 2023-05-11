@@ -13,6 +13,7 @@ import {WorldIDAirdrop} from "../WorldIDAirdrop.sol";
 /// functionality for a single airdrop.
 contract WorldIDAirdropTest is PRBTest {
     event AmountUpdated(uint256 amount);
+    event AirdropClaimed(address receiver);
 
     address public user;
     uint256 internal groupId;
@@ -56,14 +57,18 @@ contract WorldIDAirdropTest is PRBTest {
     }
 
     /// @notice Tests that the user is able to claim tokens if the World ID proof is valid
-    function testCanClaim(uint256 worldIDRoot, uint256 nullifierHash) public {
+    function testCanClaim(uint256 worldIDRoot, uint256 nullifierHash, address receiver) public {
         vm.assume(worldIDRoot != 0 && nullifierHash != 0);
 
         assertEq(token.balanceOf(address(this)), 0);
 
-        airdrop.claim(address(this), worldIDRoot, nullifierHash, proof);
+        vm.expectEmit(true, true, true, true);
+        emit AirdropClaimed(receiver);
 
-        assertEq(token.balanceOf(address(this)), airdrop.airdropAmount());
+        vm.prank(receiver);
+        airdrop.claim(receiver, worldIDRoot, nullifierHash, proof);
+
+        assertEq(token.balanceOf(receiver), airdrop.airdropAmount());
     }
 
     /// @notice Tests that nullifier hash for the same action cannot be consumed twice

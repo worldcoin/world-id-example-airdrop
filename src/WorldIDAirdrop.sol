@@ -118,6 +118,8 @@ contract WorldIDAirdrop {
         nullifierHashes[nullifierHash] = true;
 
         SafeTransferLib.safeTransferFrom(token, holder, receiver, airdropAmount);
+
+        emit AirdropClaimed(receiver);
     }
 
     ///////////////////////////////////////////////////////////////////////////////

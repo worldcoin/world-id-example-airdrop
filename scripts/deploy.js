@@ -236,75 +236,6 @@ async function deployMockAirdrop(config) {
   }
 }
 
-async function deployMockMultiAirdrop(config) {
-  dotenv.config();
-
-  await getPrivateKey(config);
-  await getEthereumRpcUrl(config);
-  await getEtherscanApiKey(config);
-  await deployWorldIDIdentityManagerRouterMock(config);
-  await getWorldIDIdentityManagerRouterAddress(config);
-  await saveConfiguration(config);
-  await getAirdropParameters(config);
-
-  const spinner = ora(`Deploying WorldIDAirdrop contract...`).start();
-
-  try {
-    const data = execSync(
-      `forge script scripts/WorldIDMultiAirdrop.s.sol:DeployWorldIDMultiAirdrop --fork-url ${config.ethereumRpcUrl} \
-      --etherscan-api-key ${config.ethereumEtherscanApiKey} --broadcast -vvvv`
-    );
-    console.log(data.toString());
-    spinner.succeed('Deployed WorldIDMultiAirdrop contract successfully!');
-  } catch (err) {
-    console.error(err);
-    spinner.fail('Deployment of WorldIDMultiAirdrop has failed.');
-  }
-}
-
-// TODO: Couldn't get it to work :(
-// You can use the following instead
-// To deploy Multi Airdrop:
-// ```
-// forge create --private-key $PRIVATE_KEY --rpc-url $RPC_URL src/WorldIDMultiAirdrop.sol:WorldIDMultiAirdrop --constructor-args $ADDRESS_OF_WORLD_ID_ROUTER
-// ```
-//
-// To encode args for verification:
-// ```
-// cast abi-encode 'constructor(address)' $ADDRESS_OF_WORLD_ID_ROUTER
-// ```
-//
-// To verify:
-//
-// ```
-// forge verify-contract $ADDRESS_OF_MULTI_AIRDROP src/WorldIDMultiAirdrop.sol:WorldIDMultiAirdrop --etherscan-api-key $API_KEY --constructor-args $CONSTRUCTOR_ARGS_FROM_CAST_ENCODE --chain 137
-// ```
-async function deployMultiAirdrop(config) {
-  dotenv.config();
-
-  await getPrivateKey(config);
-  await getEthereumRpcUrl(config);
-  await getEtherscanApiKey(config);
-  await getWorldIDIdentityManagerRouterAddress(config);
-  await saveConfiguration(config);
-  await getAirdropParameters(config);
-
-  const spinner = ora(`Deploying WorldIDAirdrop contract...`).start();
-
-  try {
-    console.log('x');
-    const data = execSync(
-      `forge script scripts/WorldIDMultiAirdrop.s.sol:DeployWorldIDMultiAirdrop --legacy --fork-url ${config.ethereumRpcUrl} --broadcast -vvvv`
-    );
-    console.log('x');
-    console.log(data.toString());
-    spinner.succeed('Deployed WorldIDMultiAirdrop contract successfully!');
-  } catch (err) {
-    console.error(err);
-    spinner.fail('Deployment of WorldIDMultiAirdrop has failed.');
-  }
-}
-
 async function setAllowance(config) {
   await getErc20Address(config);
   await getHolderAddress(config);
@@ -343,17 +274,6 @@ async function main() {
     });
 
   program
-    .name('deploy-multi-aidrop')
-    .command('deploy-multi-airdrop')
-    .description('Interactively deploys the WorldIDMultiAirdrop contracts on Ethereum mainnet.')
-    .action(async () => {
-      const options = program.opts();
-      let config = await loadConfiguration(options.config);
-      await deployMultiAirdrop(config);
-      await saveConfiguration(config);
-    });
-
-  program
     .name('mock-airdrop')
     .command('mock-airdrop')
     .description(
@@ -363,19 +283,6 @@ async function main() {
       const options = program.opts();
       let config = await loadConfiguration(options.config);
       await deployMockAirdrop(config);
-      await saveConfiguration(config);
-    });
-
-  program
-    .name('mock-multi-airdrop')
-    .command('mock-multi-airdrop')
-    .description(
-      'Interactively deploys WorldIDIdentityManagerMock alongside with WorldIDMultiAirdrop for testing.'
-    )
-    .action(async () => {
-      const options = program.opts();
-      let config = await loadConfiguration(options.config);
-      await deployMockMultiAirdrop(config);
       await saveConfiguration(config);
     });
 

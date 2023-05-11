@@ -70,10 +70,7 @@ optimizer_runs = 20000
 verbosity = 3
 
 # We can specify the contracts to track gas data for by tracing.
-gas_reports = [
-  "WolrdIDAirdrop",
-  "WorldIDMultiAirdrop",
-]
+gas_reports = ["WolrdIDAirdrop"]
 
 # === Production Profile ======================================================
 

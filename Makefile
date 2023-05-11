@@ -22,11 +22,7 @@ snapshot:; FOUNDRY_PROFILE=bench forge snapshot
 # Deploy contracts 
 deploy-airdrop: install build; node --no-warnings scripts/deploy.js deploy-airdrop
 
-deploy-multi-airdrop: install build; node --no-warnings scripts/deploy.js deploy-multi-airdrop
-
 mock-airdrop: install build; node --no-warnings scripts/deploy.js mock-airdrop
-
-mock-multi-airdrop: install build; node --no-warnings scripts/deploy.js mock-multi-airdrop
 
 # ===== Utility Rules =================================================================================================
 
