@@ -169,11 +169,11 @@ We have comprehensive docs for World ID at https://id.worldcoin.org/docs.
 ## 🗣 Feedback
 
 **World ID is in Beta, help us improve!** Please share feedback on your experience. You can find us
-on [Discord](https://discord.gg/worldcoin), look for the
+on [Discord](https://worldcoin.org/discord), look for the
 [#world-id](https://discord.com/channels/956750052771127337/968523914638688306) channel. You can
 also open an issue or a PR directly on this repo.
 
-<a href="https://discord.gg/worldcoin">
+<a href="https://worldcoin.org/discord">
   <p align="center">
     <picture align="center">
       <source media="(prefers-color-scheme: dark)" srcset="./public/images/shared-readme/join-discord-dark.png" height="80px" />
