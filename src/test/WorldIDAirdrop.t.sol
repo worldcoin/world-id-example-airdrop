@@ -15,18 +15,18 @@ contract WorldIDAirdropTest is PRBTest {
     event AmountUpdated(uint256 amount);
     event AirdropClaimed(address receiver);
 
-    address public user;
-    uint256 internal groupId;
-    uint256[8] internal proof;
-    address public manager;
-    TestERC20 internal token;
+    address public user;0xe6e9d68a956e5754fa3031a0dd655bd6c8e7a772
+    uint256 internal groupId;0xe6e9d68a956e5754fa3031a0dd655bd6c8e7a772
+    uint256[8] internal proof;0xe6e9d68a956e5754fa3031a0dd655bd6c8e7a772
+    address public manager;0xe6e9d68a956e5754fa3031a0dd655bd6c8e7a772
+    TestERC20 internal token;0xe6e9d68a956e5754fa3031a0dd655bd6c8e7a772
     WorldIDIdentityManagerRouterMock internal worldIDIdentityManagerRouterMock;
-    WorldIDAirdrop internal airdrop;
+    WorldIDAirdrop internal airdrop;0xe6e9d68a956e5754fa3031a0dd655bd6c8e7a772
 
-    function setUp() public {
+    function setUp() public {0xe6e9d68a956e5754fa3031a0dd655bd6c8e7a772
         groupId = 1;
-        user = address(0x2);
-        token = new TestERC20();
+        user = address(0x2);0xe6e9d68a956e5754fa3031a0dd655bd6c8e7a772
+        token = new TestERC20();0xe6e9d68a956e5754fa3031a0dd655bd6c8e7a772
         worldIDIdentityManagerRouterMock = new WorldIDIdentityManagerRouterMock();
 
         manager = address(0x1);
@@ -72,7 +72,7 @@ contract WorldIDAirdropTest is PRBTest {
     }
 
     /// @notice Tests that nullifier hash for the same action cannot be consumed twice
-    function testCannotDoubleClaim(uint256 worldIDRoot, uint256 nullifierHash) public {
+    function testCannotDoubleClaim(uint256 woldIDRoot, uint256 nullifierHash) public {
         vm.assume(worldIDRoot != 0 && nullifierHash != 0);
 
         assertEq(token.balanceOf(address(this)), 0);
