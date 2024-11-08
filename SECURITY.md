@@ -15,4 +15,4 @@ this project, and maintainers of upstream dependencies if applicable.
 
 The project team is committed to transparency in the security issue disclosure process. The project
 team announces security issues via
-[project Github Release notes](https://github.com/wordlcoin/world-id-example-airdrop/releases).
+[project Github Release notes](https://github.com/worldcoin/world-id-example-airdrop/releases).
